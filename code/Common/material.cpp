@@ -88,6 +88,10 @@ const char *aiTextureTypeToString(aiTextureType in) {
         return "Sheen";
     case aiTextureType_CLEARCOAT:
         return "Clearcoat";
+    case aiTextureType_IRIDESCENCE:
+        return "Iridescence";
+    case aiTextureType_ANISOTROPY:
+        return "Anisotropy";
     case aiTextureType_TRANSMISSION:
         return "Transmission";
     case aiTextureType_UNKNOWN:
