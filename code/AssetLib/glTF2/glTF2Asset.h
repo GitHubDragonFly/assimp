@@ -786,22 +786,48 @@ struct MaterialSheen {
 
 struct MaterialClearcoat {
     float clearcoatFactor = 0.f;
-    float clearcoatRoughnessFactor = 0.f;
+    float clearcoatRoughnessFactor;
     TextureInfo clearcoatTexture;
     TextureInfo clearcoatRoughnessTexture;
     NormalTextureInfo clearcoatNormalTexture;
+
+    MaterialClearcoat() { SetDefaults(); }
+    void SetDefaults();
+};
+
+struct MaterialIridescence {
+    float iridescenceFactor = 0.f;
+    float iridescenceIor;
+    float iridescenceThicknessMinimum;
+    float iridescenceThicknessMaximum;
+    float iridescenceThicknessRange[2];
+    TextureInfo iridescenceTexture;
+    TextureInfo iridescenceThicknessTexture;
+
+    MaterialIridescence() { SetDefaults(); }
+    void SetDefaults();
+};
+
+struct MaterialAnisotropy {
+    float anisotropyFactor = 0.f;
+    float anisotropyStrength;
+    float anisotropyRotation;
+    TextureInfo anisotropyTexture;
+
+    MaterialAnisotropy() { SetDefaults(); }
+    void SetDefaults();
 };
 
 struct MaterialTransmission {
-    TextureInfo transmissionTexture;
     float transmissionFactor = 0.f;
+    TextureInfo transmissionTexture;
 };
 
 struct MaterialVolume {
     float thicknessFactor = 0.f;
-    TextureInfo thicknessTexture;
-    float attenuationDistance = 0.f;
+    float attenuationDistance;
     vec3 attenuationColor;
+    TextureInfo thicknessTexture;
 
     MaterialVolume() { SetDefaults(); }
     void SetDefaults();
@@ -846,6 +872,12 @@ struct Material : public Object {
 
     //extension: KHR_materials_clearcoat
     Nullable<MaterialClearcoat> materialClearcoat;
+
+    //extension: KHR_materials_iridescence
+    Nullable<MaterialIridescence> materialIridescence;
+
+    //extension: KHR_materials_anisotropy
+    Nullable<MaterialAnisotropy> materialAnisotropy;
 
     //extension: KHR_materials_transmission
     Nullable<MaterialTransmission> materialTransmission;
@@ -1129,6 +1161,8 @@ public:
         bool KHR_texture_transform;
         bool KHR_materials_sheen;
         bool KHR_materials_clearcoat;
+        bool KHR_materials_iridescence;
+        bool KHR_materials_anisotropy;
         bool KHR_materials_transmission;
         bool KHR_materials_volume;
         bool KHR_materials_ior;
@@ -1145,6 +1179,8 @@ public:
                 KHR_texture_transform(false), 
                 KHR_materials_sheen(false), 
                 KHR_materials_clearcoat(false), 
+                KHR_materials_iridescence(false), 
+                KHR_materials_anisotropy(false),
                 KHR_materials_transmission(false), 
                 KHR_materials_volume(false),
                 KHR_materials_ior(false),

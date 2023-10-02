@@ -479,6 +479,59 @@ namespace glTF2 {
             }
         }
 
+        if (m.materialIridescence.isPresent) {
+            Value materialIridescence(rapidjson::Type::kObjectType);
+
+            MaterialIridescence &iridescence = m.materialIridescence.value;
+
+            if (iridescence.iridescenceFactor != 0.f) {
+                WriteFloat(materialIridescence, iridescence.iridescenceFactor, "iridescenceFactor", w.mAl);
+            }
+
+            if (iridescence.iridescenceIor != 1.3f) {
+                WriteFloat(materialIridescence, iridescence.iridescenceIor, "iridescenceIor", w.mAl);
+            }
+
+            if (iridescence.iridescenceThicknessMinimum != 100.f) {
+                WriteFloat(materialIridescence, iridescence.iridescenceThicknessMinimum, "iridescenceThicknessMinimum", w.mAl);
+            }
+
+            if (iridescence.iridescenceThicknessMaximum != 400.f) {
+                WriteFloat(materialIridescence, iridescence.iridescenceThicknessMaximum, "iridescenceThicknessMaximum", w.mAl);
+            }
+
+            WriteTex(materialIridescence, iridescence.iridescenceTexture, "iridescenceTexture", w.mAl);
+            WriteTex(materialIridescence, iridescence.iridescenceThicknessTexture, "iridescenceThicknessTexture", w.mAl);
+
+            if (!materialIridescence.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_iridescence", materialIridescence, w.mAl);
+            }
+        }
+
+        if (m.materialAnisotropy.isPresent) {
+            Value materialAnisotropy(rapidjson::Type::kObjectType);
+
+            MaterialAnisotropy &anisotropy = m.materialAnisotropy.value;
+
+            if (anisotropy.anisotropyFactor != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyFactor, "anisotropyFactor", w.mAl);
+            }
+
+            if (anisotropy.anisotropyStrength != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyStrength, "anisotropyStrength", w.mAl);
+            }
+
+            if (anisotropy.anisotropyRotation != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyRotation, "anisotropyRotation", w.mAl);
+            }
+
+            WriteTex(materialAnisotropy, anisotropy.anisotropyTexture, "anisotropyTexture", w.mAl);
+
+            if (!materialAnisotropy.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_anisotropy", materialAnisotropy, w.mAl);
+            }
+        }
+
         if (m.materialTransmission.isPresent) {
             Value materialTransmission(rapidjson::Type::kObjectType);
 
@@ -998,6 +1051,14 @@ namespace glTF2 {
 
             if (this->mAsset.extensionsUsed.KHR_materials_clearcoat) {
                 exts.PushBack(StringRef("KHR_materials_clearcoat"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_iridescence) {
+                exts.PushBack(StringRef("KHR_materials_iridescence"), mAl);
+            }
+
+            if (this->mAsset.extensionsUsed.KHR_materials_anisotropy) {
+                exts.PushBack(StringRef("KHR_materials_anisotropy"), mAl);
             }
 
             if (this->mAsset.extensionsUsed.KHR_materials_transmission) {

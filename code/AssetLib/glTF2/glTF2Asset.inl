@@ -45,9 +45,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringUtils.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Base64.hpp>
-#include <rapidjson/document.h>
-#include <rapidjson/schema.h>
-#include <rapidjson/stringbuffer.h>
 
 // clang-format off
 #ifdef ASSIMP_ENABLE_DRACO
@@ -1321,6 +1318,35 @@ inline void Material::Read(Value &material, Asset &r) {
             }
         }
 
+        if (r.extensionsUsed.KHR_materials_iridescence) {
+            if (Value *curMaterialIridescence = FindObject(*extensions, "KHR_materials_iridescence")) {
+                MaterialIridescence iridescence;
+
+                ReadMember(*curMaterialIridescence, "iridescenceFactor", iridescence.iridescenceFactor);
+                ReadTextureProperty(r, *curMaterialIridescence, "iridescenceTexture", iridescence.iridescenceTexture);
+                ReadMember(*curMaterialIridescence, "iridescenceIor", iridescence.iridescenceIor);
+                ReadMember(*curMaterialIridescence, "iridescenceThicknessMinimum", iridescence.iridescenceThicknessMinimum);
+                ReadMember(*curMaterialIridescence, "iridescenceThicknessMaximum", iridescence.iridescenceThicknessMaximum);
+                ReadMember(*curMaterialIridescence, "iridescenceThicknessRange", iridescence.iridescenceThicknessRange);
+                ReadTextureProperty(r, *curMaterialIridescence, "iridescenceThicknessTexture", iridescence.iridescenceThicknessTexture);
+
+                this->materialIridescence = Nullable<MaterialIridescence>(iridescence);
+            }
+        }
+
+        if (r.extensionsUsed.KHR_materials_anisotropy) {
+            if (Value *curMaterialAnisotropy = FindObject(*extensions, "KHR_materials_anisotropy")) {
+                MaterialAnisotropy anisotropy;
+
+                ReadMember(*curMaterialAnisotropy, "anisotropyFactor", anisotropy.anisotropyFactor);
+                ReadTextureProperty(r, *curMaterialAnisotropy, "anisotropyTexture", anisotropy.anisotropyTexture);
+                ReadMember(*curMaterialAnisotropy, "anisotropyStrength", anisotropy.anisotropyStrength);
+                ReadMember(*curMaterialAnisotropy, "anisotropyRotation", anisotropy.anisotropyRotation);
+
+                this->materialAnisotropy = Nullable<MaterialAnisotropy>(anisotropy);
+            }
+        }
+
         if (r.extensionsUsed.KHR_materials_transmission) {
             if (Value *curMaterialTransmission = FindObject(*extensions, "KHR_materials_transmission")) {
                 MaterialTransmission transmission;
@@ -1399,6 +1425,26 @@ inline void MaterialSheen::SetDefaults() {
     //KHR_materials_sheen properties
     SetVector(sheenColorFactor, defaultSheenFactor);
     sheenRoughnessFactor = 0.f;
+}
+
+inline void MaterialClearcoat::SetDefaults() {
+    //KHR_materials_clearcoat properties
+    clearcoatRoughnessFactor = 0.f;
+}
+
+inline void MaterialIridescence::SetDefaults() {
+    //KHR_materials_iridescence properties
+    iridescenceIor = 1.3f;
+    iridescenceThicknessMinimum = 100.f;
+    iridescenceThicknessMaximum = 400.f;
+    iridescenceThicknessRange[0] = 100.f;
+    iridescenceThicknessRange[1] = 400.f;
+}
+
+inline void MaterialAnisotropy::SetDefaults() {
+    //KHR_materials_anisotropy properties
+    anisotropyStrength = 0.f;
+    anisotropyRotation = 0.f;
 }
 
 inline void MaterialVolume::SetDefaults() {
@@ -2087,6 +2133,8 @@ inline void Asset::ReadExtensionsUsed(Document &doc) {
     CHECK_EXT(KHR_texture_transform);
     CHECK_EXT(KHR_materials_sheen);
     CHECK_EXT(KHR_materials_clearcoat);
+    CHECK_EXT(KHR_materials_iridescence);
+    CHECK_EXT(KHR_materials_anisotropy);
     CHECK_EXT(KHR_materials_transmission);
     CHECK_EXT(KHR_materials_volume);
     CHECK_EXT(KHR_materials_ior);

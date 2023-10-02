@@ -234,8 +234,7 @@ inline void SetMaterialTextureProperty(std::vector<int> &embeddedTexIdxs, Asset 
     SetMaterialTextureProperty(embeddedTexIdxs, r, (glTF2::TextureInfo)prop, mat, texType, texSlot);
 
     if (prop.texture && prop.texture->source) {
-        std::string textureStrengthKey = std::string(_AI_MATKEY_TEXTURE_BASE) + "." + "strength";
-        mat->AddProperty(&prop.strength, 1, textureStrengthKey.c_str(), texType, texSlot);
+        mat->AddProperty(&prop.strength, 1, AI_MATKEY_GLTF_TEXTURE_STRENGTH(texType, texSlot));
     }
 }
 
@@ -324,8 +323,8 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             if (std::memcmp(sheen.sheenColorFactor, defaultSheenFactor, sizeof(glTFCommon::vec3)) != 0) {
                 SetMaterialColorProperty(r, sheen.sheenColorFactor, aimat, AI_MATKEY_SHEEN_COLOR_FACTOR);
                 aimat->AddProperty(&sheen.sheenRoughnessFactor, 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, AI_MATKEY_SHEEN_COLOR_TEXTURE);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, AI_MATKEY_SHEEN_ROUGHNESS_TEXTURE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenColorTexture, aimat, aiTextureType_SHEEN, 0);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, sheen.sheenRoughnessTexture, aimat, aiTextureType_SHEEN, 1);
             }
         }
 
@@ -336,10 +335,35 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             if (clearcoat.clearcoatFactor != 0.0f) {
                 aimat->AddProperty(&clearcoat.clearcoatFactor, 1, AI_MATKEY_CLEARCOAT_FACTOR);
                 aimat->AddProperty(&clearcoat.clearcoatRoughnessFactor, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, AI_MATKEY_CLEARCOAT_TEXTURE);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, aiTextureType_CLEARCOAT, 0);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, aiTextureType_CLEARCOAT, 1);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, aiTextureType_CLEARCOAT, 2);
             }
+        }
+
+        // KHR_materials_iridescence
+        if (mat.materialIridescence.isPresent) {
+            MaterialIridescence &iridescence = mat.materialIridescence.value;
+            // Default value 0.0 disables iridescence
+            if (iridescence.iridescenceFactor != 0.0f) {
+                aimat->AddProperty(&iridescence.iridescenceFactor, 1, AI_MATKEY_IRIDESCENCE_FACTOR);
+                aimat->AddProperty(&iridescence.iridescenceIor, 1, AI_MATKEY_IRIDESCENCE_IOR);
+                aimat->AddProperty(&iridescence.iridescenceThicknessMinimum, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM);
+                aimat->AddProperty(&iridescence.iridescenceThicknessMaximum, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM);
+                aimat->AddProperty(&iridescence.iridescenceThicknessRange, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_RANGE);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, iridescence.iridescenceTexture, aimat, aiTextureType_IRIDESCENCE, 0);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, iridescence.iridescenceThicknessTexture, aimat, aiTextureType_IRIDESCENCE, 1);
+            }
+        }
+
+        // KHR_materials_anisotropy
+        if (mat.materialAnisotropy.isPresent) {
+            MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
+
+            aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+            aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
+            aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
         }
 
         // KHR_materials_transmission
@@ -347,7 +371,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             MaterialTransmission &transmission = mat.materialTransmission.value;
 
             aimat->AddProperty(&transmission.transmissionFactor, 1, AI_MATKEY_TRANSMISSION_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, AI_MATKEY_TRANSMISSION_TEXTURE);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, transmission.transmissionTexture, aimat, aiTextureType_TRANSMISSION, 0);
         }
 
         // KHR_materials_volume
@@ -355,7 +379,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             MaterialVolume &volume = mat.materialVolume.value;
 
             aimat->AddProperty(&volume.thicknessFactor, 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, aiTextureType_TRANSMISSION, 1);
             aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
             SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
         }

@@ -79,6 +79,8 @@ struct PbrSpecularGlossiness;
 struct MaterialSpecular;
 struct MaterialSheen;
 struct MaterialClearcoat;
+struct MaterialIridescence;
+struct MaterialAnisotropy;
 struct MaterialTransmission;
 struct MaterialVolume;
 struct MaterialIOR;
@@ -121,6 +123,8 @@ protected:
     bool GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular);
     bool GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen);
     bool GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearcoat &clearcoat);
+    bool GetMatIridescence(const aiMaterial &mat, glTF2::MaterialIridescence &iridescence);
+    bool GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAnisotropy &anisotropy);
     bool GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission);
     bool GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume);
     bool GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior);

@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_materials_unlit: full
  *   KHR_materials_sheen: full
  *   KHR_materials_clearcoat: full
+ *   KHR_materials_iridescence: full
+ *   KHR_materials_anisotropy: full
  *   KHR_materials_transmission: full
  *   KHR_materials_volume: full
  *   KHR_materials_ior: full
