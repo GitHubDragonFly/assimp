@@ -318,6 +318,22 @@ enum aiTextureType {
     */
     aiTextureType_TRANSMISSION = 21,
 
+    /** Iridescence
+    * Iridescence is an effect where hue varies depending on the viewing angle and illumination angle:
+    * a thin-film of a semi-transparent layer results in inter-reflections and due to thin-film interference,
+    * certain wavelengths get absorbed or amplified.
+    * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_iridescence
+    */
+    aiTextureType_IRIDESCENCE = 22,
+
+    /** Anisotropy
+    * Defines the anisotropic property of a material as observable with brushed metals for example.
+    * An asymmetric specular lobe model is introduced to allow for such phenomena.
+    * The visually distinct feature of that lobe is the elongated appearance of the specular reflection.
+    * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_anisotropy
+    */
+    aiTextureType_ANISOTROPY = 23,
+
     /** Unknown texture
      *
      *  A texture reference that does not match any of the definitions
@@ -1021,6 +1037,33 @@ extern "C" {
 #define AI_MATKEY_CLEARCOAT_TEXTURE aiTextureType_CLEARCOAT, 0
 #define AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE aiTextureType_CLEARCOAT, 1
 #define AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE aiTextureType_CLEARCOAT, 2
+
+// Iridescence
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_iridescence
+// Iridescence describes an effect where hue varies depending on the viewing angle and illumination angle.
+#define AI_MATKEY_IRIDESCENCE_FACTOR "$mat.iridescence.factor", 0, 0
+// Thickness and index of refraction (IOR) of the thin-film can be specified.
+#define AI_MATKEY_IRIDESCENCE_IOR "$mat.iridescence.iridescenceIor", 0, 0
+#define AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM "$mat.iridescence.iridescenceThicknessMinimum", 0, 0
+#define AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM "$mat.iridescence.iridescenceThicknessMaximum", 0, 0
+#define AI_MATKEY_IRIDESCENCE_THICKNESS_RANGE "$mat.iridescence.iridescenceThicknessRange", 0, 0
+// The iridescence intensity texture.
+#define AI_MATKEY_IRIDESCENCE_TEXTURE aiTextureType_IRIDESCENCE, 0
+// The thickness texture of the thin-film layer.
+#define AI_MATKEY_IRIDESCENCE_THICKNESS_TEXTURE aiTextureType_IRIDESCENCE, 1
+
+// Anisotropy
+// ------------
+// https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_anisotropy
+// The anisotropic property of a material as observable with brushed metals for example
+#define AI_MATKEY_ANISOTROPY_FACTOR "$mat.anisotropy.factor", 0, 0
+#define AI_MATKEY_ANISOTROPY_STRENGTH "$mat.anisotropy.anisotropyStrength", 0, 0
+#define AI_MATKEY_ANISOTROPY_ROTATION "$mat.anisotropy.anisotropyRotation", 0, 0
+// Texture whose red and green channels represent the anisotropy direction in [-1, 1] tangent, bitangent space.
+// The blue channel contains strength as [0, 1] to be multiplied by AI_MATKEY_ANISOTROPY_STRENGTH.
+// Rotated by AI_MATKEY_ANISOTROPY_ROTATION
+#define AI_MATKEY_ANISOTROPY_TEXTURE aiTextureType_ANISOTROPY, 0
 
 // Transmission
 // ------------
