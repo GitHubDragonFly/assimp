@@ -134,7 +134,16 @@ struct Material {
     aiString textureDisp;
     aiString textureRoughness;
     aiString textureMetallic;
-    aiString textureSheen;
+    aiString textureClearcoat;
+    aiString textureClearcoatRoughness;
+    aiString textureClearcoatNormal;
+    aiString textureIridescence;
+    aiString textureIridescenceThickness;
+    aiString textureSheenColor;
+    aiString textureSheenRoughness;
+    aiString textureThickness;
+    aiString textureTransmission;
+    aiString textureAnisotropy;
     aiString textureRMA;
 
     enum TextureType {
@@ -156,7 +165,11 @@ struct Material {
         TextureDispType,
         TextureRoughnessType,
         TextureMetallicType,
+        TextureClearcoatType,
+        TextureIridescenceType,
         TextureSheenType,
+        TextureTransmissionType,
+        TextureAnisotropyType,
         TextureRMAType,
         TextureTypeCount
     };
@@ -172,8 +185,8 @@ struct Material {
     aiColor3D emissive;
     //! Alpha value
     ai_real alpha;
-    //! Shineness factor
-    ai_real shineness;
+    //! Shininess factor
+    ai_real shininess;
     //! Illumination model
     int illumination_model;
     //! Index of refraction
@@ -187,12 +200,29 @@ struct Material {
     Maybe<ai_real> metallic;
     //! PBR Metallic
     Maybe<aiColor3D> sheen;
+    //! PBR Sheen Roughness
+    Maybe<ai_real> sheen_roughness;
     //! PBR Clearcoat Thickness
     Maybe<ai_real> clearcoat_thickness;
-    //! PBR Clearcoat Rougness
+    //! PBR Clearcoat Roughness
     Maybe<ai_real> clearcoat_roughness;
+    //! PBR Transmission
+    Maybe<ai_real> transmission;
+    //! PBR Volume Thickness
+    Maybe<ai_real> thickness;
+    //! PBR Volume attenuation color / distance
+    Maybe<aiColor3D> attenuationColor;
+    Maybe<ai_real> attenuationDistance;
+    //! PBR Iridescence
+    Maybe<ai_real> iridescence;
+    Maybe<ai_real> iridescenceIor;
+    Maybe<ai_real> iridescenceThicknessMinimum;
+    Maybe<ai_real> iridescenceThicknessMaximum;
+    Maybe<ai_real> iridescenceThicknessRange[2];
     //! PBR Anisotropy
-    ai_real anisotropy;
+    Maybe<ai_real> anisotropy;
+    Maybe<ai_real> anisotropyRotation;
+    Maybe<ai_real> anisotropyStrength;
 
     //! bump map multipler (normal map scalar)(-bm)
     ai_real bump_multiplier;
@@ -201,16 +231,28 @@ struct Material {
     Material() :
             diffuse(ai_real(0.6), ai_real(0.6), ai_real(0.6)),
             alpha(ai_real(1.0)),
-            shineness(ai_real(0.0)),
+            shininess(ai_real(0.0)),
             illumination_model(1),
             ior(ai_real(1.0)),
             transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
             roughness(),
             metallic(),
             sheen(),
+            sheen_roughness(),
             clearcoat_thickness(),
             clearcoat_roughness(),
-            anisotropy(ai_real(0.0)),
+            transmission(),
+            thickness(),
+            attenuationColor(),
+            attenuationDistance(),
+            iridescence(),
+            iridescenceIor(),
+            iridescenceThicknessMinimum(),
+            iridescenceThicknessMaximum(),
+            iridescenceThicknessRange(),
+            anisotropy(),
+            anisotropyRotation(),
+            anisotropyStrength(),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }

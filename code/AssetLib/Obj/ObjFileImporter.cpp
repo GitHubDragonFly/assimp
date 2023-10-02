@@ -615,7 +615,7 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         mat->AddProperty(&pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
         mat->AddProperty(&pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR);
         mat->AddProperty(&pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
-        mat->AddProperty(&pCurrentMaterial->shineness, 1, AI_MATKEY_SHININESS);
+        mat->AddProperty(&pCurrentMaterial->shininess, 1, AI_MATKEY_SHININESS);
         mat->AddProperty(&pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY);
         mat->AddProperty(&pCurrentMaterial->transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
         if (pCurrentMaterial->roughness)
@@ -624,11 +624,34 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             mat->AddProperty(&pCurrentMaterial->metallic.Get(), 1, AI_MATKEY_METALLIC_FACTOR);
         if (pCurrentMaterial->sheen)
             mat->AddProperty(&pCurrentMaterial->sheen.Get(), 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
+        if (pCurrentMaterial->sheen_roughness)
+            mat->AddProperty(&pCurrentMaterial->sheen_roughness.Get(), 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
         if (pCurrentMaterial->clearcoat_thickness)
             mat->AddProperty(&pCurrentMaterial->clearcoat_thickness.Get(), 1, AI_MATKEY_CLEARCOAT_FACTOR);
         if (pCurrentMaterial->clearcoat_roughness)
             mat->AddProperty(&pCurrentMaterial->clearcoat_roughness.Get(), 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
-        mat->AddProperty(&pCurrentMaterial->anisotropy, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+        if (pCurrentMaterial->iridescence)
+            mat->AddProperty(&pCurrentMaterial->iridescence.Get(), 1, AI_MATKEY_IRIDESCENCE_FACTOR);
+        if (pCurrentMaterial->iridescenceIor)
+            mat->AddProperty(&pCurrentMaterial->iridescenceIor.Get(), 1, AI_MATKEY_IRIDESCENCE_IOR);
+        if (pCurrentMaterial->iridescenceThicknessMinimum)
+            mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMinimum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM);
+        if (pCurrentMaterial->iridescenceThicknessMaximum)
+            mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMaximum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM);
+        if (pCurrentMaterial->transmission)
+            mat->AddProperty(&pCurrentMaterial->transmission.Get(), 1, AI_MATKEY_TRANSMISSION_FACTOR);
+        if (pCurrentMaterial->thickness)
+            mat->AddProperty(&pCurrentMaterial->thickness.Get(), 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
+        if (pCurrentMaterial->attenuationDistance) {
+            mat->AddProperty(&pCurrentMaterial->attenuationColor.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+            mat->AddProperty(&pCurrentMaterial->attenuationDistance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+        }
+        if (pCurrentMaterial->anisotropy)
+            mat->AddProperty(&pCurrentMaterial->anisotropy.Get(), 1, AI_MATKEY_ANISOTROPY_FACTOR);
+        if (pCurrentMaterial->anisotropyStrength)
+            mat->AddProperty(&pCurrentMaterial->anisotropyStrength.Get(), 1, AI_MATKEY_ANISOTROPY_STRENGTH);
+        if (pCurrentMaterial->anisotropyRotation)
+            mat->AddProperty(&pCurrentMaterial->anisotropyRotation.Get(), 1, AI_MATKEY_ANISOTROPY_ROTATION);
 
         // Adding refraction index
         mat->AddProperty(&pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI);
@@ -726,14 +749,6 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             }
         }
 
-        if (0 != pCurrentMaterial->textureRoughness.length) {
-            mat->AddProperty(&pCurrentMaterial->textureRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0);
-            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0 );
-            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRoughnessType]) {
-                addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE_ROUGHNESS);
-            }
-        }
-
         if (0 != pCurrentMaterial->textureMetallic.length) {
             mat->AddProperty(&pCurrentMaterial->textureMetallic, _AI_MATKEY_TEXTURE_BASE, aiTextureType_METALNESS, 0);
             mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_METALNESS, 0 );
@@ -742,11 +757,91 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             }
         }
 
-        if (0 != pCurrentMaterial->textureSheen.length) {
-            mat->AddProperty(&pCurrentMaterial->textureSheen, _AI_MATKEY_TEXTURE_BASE, aiTextureType_SHEEN, 0);
+        if (0 != pCurrentMaterial->textureRoughness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_DIFFUSE_ROUGHNESS, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureRoughnessType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE_ROUGHNESS);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureClearcoat.length) {
+            mat->AddProperty(&pCurrentMaterial->textureClearcoat, _AI_MATKEY_TEXTURE_BASE, aiTextureType_CLEARCOAT, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_CLEARCOAT, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureClearcoatType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_CLEARCOAT);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureClearcoatRoughness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureClearcoatRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_CLEARCOAT, 1);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_CLEARCOAT, 1 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureClearcoatType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_CLEARCOAT);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureClearcoatNormal.length) {
+            mat->AddProperty(&pCurrentMaterial->textureClearcoatNormal, _AI_MATKEY_TEXTURE_BASE, aiTextureType_CLEARCOAT, 2);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_CLEARCOAT, 2 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureClearcoatType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_CLEARCOAT);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureIridescence.length) {
+            mat->AddProperty(&pCurrentMaterial->textureIridescence, _AI_MATKEY_TEXTURE_BASE, aiTextureType_IRIDESCENCE, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_IRIDESCENCE, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureIridescenceType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_IRIDESCENCE);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureIridescenceThickness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureIridescenceThickness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_IRIDESCENCE, 1);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_IRIDESCENCE, 1 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureIridescenceType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_IRIDESCENCE);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureAnisotropy.length) {
+            mat->AddProperty(&pCurrentMaterial->textureAnisotropy, _AI_MATKEY_TEXTURE_BASE, aiTextureType_ANISOTROPY, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_ANISOTROPY, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureAnisotropyType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_ANISOTROPY);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSheenColor.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSheenColor, _AI_MATKEY_TEXTURE_BASE, aiTextureType_SHEEN, 0);
             mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_SHEEN, 0 );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureSheenType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_SHEEN);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSheenRoughness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSheenRoughness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_SHEEN, 1);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_SHEEN, 1 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureSheenType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_SHEEN);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureTransmission.length) {
+            mat->AddProperty(&pCurrentMaterial->textureTransmission, _AI_MATKEY_TEXTURE_BASE, aiTextureType_TRANSMISSION, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_TRANSMISSION, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureTransmissionType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_TRANSMISSION);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureThickness.length) {
+            mat->AddProperty(&pCurrentMaterial->textureThickness, _AI_MATKEY_TEXTURE_BASE, aiTextureType_TRANSMISSION, 1);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_TRANSMISSION, 1 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TextureTransmissionType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_TRANSMISSION);
             }
         }
 
