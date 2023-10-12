@@ -56,6 +56,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ai_assert.h>
 #include <assimp/commonMetaData.h>
 #include <assimp/importerdesc.h>
+#include <assimp/vector2.h>
 #include <assimp/scene.h>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/Importer.hpp>
@@ -278,21 +279,11 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
         aiString alphaMode(mat.alphaMode);
         aimat->AddProperty(&alphaMode, AI_MATKEY_GLTF_ALPHAMODE);
-        aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_GLTF_ALPHACUTOFF);
+        aimat->AddProperty(&mat.alphaCutoff, 1, AI_MATKEY_ALPHACUTOFF);
+        aimat->AddProperty(&mat.reflectivity, 1, AI_MATKEY_REFLECTIVITY);
 
-        // KHR_materials_specular
-        if (mat.materialSpecular.isPresent) {
-            MaterialSpecular &specular = mat.materialSpecular.value;
-            // Default values of zero disables Specular
-            if (std::memcmp(specular.specularColorFactor, defaultSpecularColorFactor, sizeof(glTFCommon::vec3)) != 0 || specular.specularFactor != 0.0f) {
-                SetMaterialColorProperty(r, specular.specularColorFactor, aimat, AI_MATKEY_COLOR_SPECULAR);
-                aimat->AddProperty(&specular.specularFactor, 1, AI_MATKEY_SPECULAR_FACTOR);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularTexture, aimat, aiTextureType_SPECULAR);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularColorTexture, aimat, aiTextureType_SPECULAR);
-            }
-        }
         // pbrSpecularGlossiness
-        else if (mat.pbrSpecularGlossiness.isPresent) {
+        if (mat.pbrSpecularGlossiness.isPresent) {
             PbrSpecularGlossiness &pbrSG = mat.pbrSpecularGlossiness.value;
 
             SetMaterialColorProperty(r, pbrSG.diffuseFactor, aimat, AI_MATKEY_COLOR_DIFFUSE);
@@ -303,8 +294,18 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             aimat->AddProperty(&pbrSG.glossinessFactor, 1, AI_MATKEY_GLOSSINESS_FACTOR);
 
             SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.diffuseTexture, aimat, aiTextureType_DIFFUSE);
-
             SetMaterialTextureProperty(embeddedTexIdxs, r, pbrSG.specularGlossinessTexture, aimat, aiTextureType_SPECULAR);
+        }
+        // KHR_materials_specular
+        else if (mat.materialSpecular.isPresent) {
+            MaterialSpecular &specular = mat.materialSpecular.value;
+            // Default values of zero disables Specular
+            if (specular.specularFactor != 0.0f) {
+                aimat->AddProperty(&specular.specularFactor, 1, AI_MATKEY_PBR_SPECULAR_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularIntensityTexture, aimat, aiTextureType_PBR_SPECULAR, 0);
+                SetMaterialColorProperty(r, specular.specularColorFactor, aimat, AI_MATKEY_PBR_SPECULAR_COLOR_FACTOR);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, specular.specularColorTexture, aimat, aiTextureType_PBR_SPECULAR, 1);
+            }
         }
 
         // glTFv2 is either PBR or Unlit
@@ -335,6 +336,7 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             if (clearcoat.clearcoatFactor != 0.0f) {
                 aimat->AddProperty(&clearcoat.clearcoatFactor, 1, AI_MATKEY_CLEARCOAT_FACTOR);
                 aimat->AddProperty(&clearcoat.clearcoatRoughnessFactor, 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+                aimat->AddProperty(&clearcoat.clearcoatNormalScale, 1, AI_MATKEY_CLEARCOAT_NORMAL_SCALE);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatTexture, aimat, aiTextureType_CLEARCOAT, 0);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatRoughnessTexture, aimat, aiTextureType_CLEARCOAT, 1);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, clearcoat.clearcoatNormalTexture, aimat, aiTextureType_CLEARCOAT, 2);
@@ -350,7 +352,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
                 aimat->AddProperty(&iridescence.iridescenceIor, 1, AI_MATKEY_IRIDESCENCE_IOR);
                 aimat->AddProperty(&iridescence.iridescenceThicknessMinimum, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM);
                 aimat->AddProperty(&iridescence.iridescenceThicknessMaximum, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM);
-                aimat->AddProperty(&iridescence.iridescenceThicknessRange, 1, AI_MATKEY_IRIDESCENCE_THICKNESS_RANGE);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, iridescence.iridescenceTexture, aimat, aiTextureType_IRIDESCENCE, 0);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, iridescence.iridescenceThicknessTexture, aimat, aiTextureType_IRIDESCENCE, 1);
             }
@@ -360,10 +361,12 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
         if (mat.materialAnisotropy.isPresent) {
             MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
 
-            aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
-            aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
-            aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
+            if (anisotropy.anisotropyFactor != 0.f) {
+                aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+                aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
+                aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
+            }
         }
 
         // KHR_materials_transmission
@@ -379,9 +382,9 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             MaterialVolume &volume = mat.materialVolume.value;
 
             aimat->AddProperty(&volume.thicknessFactor, 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
-            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, aiTextureType_TRANSMISSION, 1);
-            aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
             SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+            aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+            SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, aiTextureType_TRANSMISSION, 1);
         }
 
         // KHR_materials_ior

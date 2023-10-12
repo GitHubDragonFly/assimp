@@ -119,6 +119,7 @@ protected:
     void GetMatTex(const aiMaterial &mat, glTF2::OcclusionTextureInfo &prop, aiTextureType tt, unsigned int slot);
     aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec4 &prop, const char *propName, int type, int idx) const;
     aiReturn GetMatColor(const aiMaterial &mat, glTF2::vec3 &prop, const char *propName, int type, int idx) const;
+    aiReturn GetMatVector2(const aiMaterial &mat, glTF2::vec2 &prop, const char *propName, int type, int idx) const;
     bool GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG);
     bool GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular);
     bool GetMatSheen(const aiMaterial &mat, glTF2::MaterialSheen &sheen);

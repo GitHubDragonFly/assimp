@@ -49,6 +49,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *   KHR_lights_punctual full
  *   KHR_materials_sheen full
  *   KHR_materials_clearcoat full
+ *   KHR_materials_iridescence full
+ *   KHR_materials_anisotropy full
  *   KHR_materials_transmission full
  *   KHR_materials_volume full
  *   KHR_materials_ior full
@@ -139,6 +141,7 @@ struct Texture;
 struct Skin;
 
 using glTFCommon::mat4;
+using glTFCommon::vec2;
 using glTFCommon::vec3;
 using glTFCommon::vec4;
 
@@ -722,7 +725,8 @@ const vec4 defaultDiffuseFactor = { 1, 1, 1, 1 };
 const vec3 defaultSpecularFactor = { 1, 1, 1 };
 const vec3 defaultSpecularColorFactor = { 0, 0, 0 };
 const vec3 defaultSheenFactor = { 0, 0, 0 };
-const vec3 defaultAttenuationColor = { 1, 1, 1 };
+const vec2 defaultClearcoatNormalScale = { 1, 1 };
+const vec3 defaultAttenuationColorFactor = { 1, 1, 1 };
 
 struct TextureInfo {
     Ref<Texture> texture;
@@ -767,7 +771,7 @@ struct PbrSpecularGlossiness {
 struct MaterialSpecular {
     float specularFactor;
     vec3 specularColorFactor;
-    TextureInfo specularTexture;
+    TextureInfo specularIntensityTexture;
     TextureInfo specularColorTexture;
 
     MaterialSpecular() { SetDefaults(); }
@@ -785,8 +789,9 @@ struct MaterialSheen {
 };
 
 struct MaterialClearcoat {
-    float clearcoatFactor = 0.f;
+    float clearcoatFactor;
     float clearcoatRoughnessFactor;
+    vec2 clearcoatNormalScale;
     TextureInfo clearcoatTexture;
     TextureInfo clearcoatRoughnessTexture;
     NormalTextureInfo clearcoatNormalTexture;
@@ -796,11 +801,10 @@ struct MaterialClearcoat {
 };
 
 struct MaterialIridescence {
-    float iridescenceFactor = 0.f;
+    float iridescenceFactor;
     float iridescenceIor;
     float iridescenceThicknessMinimum;
     float iridescenceThicknessMaximum;
-    float iridescenceThicknessRange[2];
     TextureInfo iridescenceTexture;
     TextureInfo iridescenceThicknessTexture;
 
@@ -808,23 +812,16 @@ struct MaterialIridescence {
     void SetDefaults();
 };
 
-struct MaterialAnisotropy {
-    float anisotropyFactor = 0.f;
-    float anisotropyStrength;
-    float anisotropyRotation;
-    TextureInfo anisotropyTexture;
+struct MaterialTransmission {
+    float transmissionFactor;
+    TextureInfo transmissionTexture;
 
-    MaterialAnisotropy() { SetDefaults(); }
+    MaterialTransmission() { SetDefaults(); }
     void SetDefaults();
 };
 
-struct MaterialTransmission {
-    float transmissionFactor = 0.f;
-    TextureInfo transmissionTexture;
-};
-
 struct MaterialVolume {
-    float thicknessFactor = 0.f;
+    float thicknessFactor;
     float attenuationDistance;
     vec3 attenuationColor;
     TextureInfo thicknessTexture;
@@ -833,15 +830,25 @@ struct MaterialVolume {
     void SetDefaults();
 };
 
+struct MaterialAnisotropy {
+    float anisotropyFactor;
+    float anisotropyStrength;
+    float anisotropyRotation;
+    TextureInfo anisotropyTexture;
+
+    MaterialAnisotropy() { SetDefaults(); }
+    void SetDefaults();
+};
+
 struct MaterialIOR {
-    float ior = 0.f;
+    float ior;
 
     MaterialIOR() { SetDefaults(); }
     void SetDefaults();
 };
 
 struct MaterialEmissiveStrength {
-    float emissiveStrength = 0.f;
+    float emissiveStrength;
 
     MaterialEmissiveStrength() { SetDefaults(); }
     void SetDefaults();
@@ -859,6 +866,7 @@ struct Material : public Object {
     vec3 emissiveFactor;
     std::string alphaMode;
     float alphaCutoff;
+    float reflectivity;
     bool doubleSided;
 
     //extension: KHR_materials_pbrSpecularGlossiness

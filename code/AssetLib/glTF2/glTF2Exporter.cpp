@@ -51,7 +51,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/StringComparison.h>
 #include <assimp/commonMetaData.h>
 #include <assimp/material.h>
-#include <assimp/scene.h>
+#include <assimp/material.inl>
+#include <assimp/vector2.h>
 #include <assimp/version.h>
 #include <assimp/Exporter.hpp>
 #include <assimp/IOSystem.hpp>
@@ -695,6 +696,18 @@ aiReturn glTF2Exporter::GetMatColor(const aiMaterial &mat, vec3 &prop, const cha
     return result;
 }
 
+aiReturn glTF2Exporter::GetMatVector2(const aiMaterial &mat, vec2 &prop, const char *propName, int type, int idx) const {
+    aiVector2D v;
+    aiReturn result = mat.Get(propName, type, idx, v);
+
+    if (result == AI_SUCCESS) {
+        prop[0] = v.x;
+        prop[1] = v.y;
+    }
+
+    return result;
+}
+
 // This extension has been deprecated, only export with the specific flag enabled, defaults to false. Uses KHR_material_specular default.
 bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlossiness &pbrSG) {
     bool result = false;
@@ -730,7 +743,7 @@ bool glTF2Exporter::GetMatSpecGloss(const aiMaterial &mat, glTF2::PbrSpecularGlo
 
 bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecular &specular) {
     // Specular requires either/or, default factors of zero disables specular, so do not export
-    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_COLOR_SPECULAR) != AI_SUCCESS && mat.Get(AI_MATKEY_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
+    if (GetMatColor(mat, specular.specularColorFactor, AI_MATKEY_PBR_SPECULAR_COLOR_FACTOR) != AI_SUCCESS && mat.Get(AI_MATKEY_PBR_SPECULAR_FACTOR, specular.specularFactor) != AI_SUCCESS) {
         return false;
     }
     // The spec states that the default is 1.0 and [1.0, 1.0, 1.0]. We if both are 0, which should disable specular. Otherwise, if one is 0, set to 1.0
@@ -742,8 +755,8 @@ bool glTF2Exporter::GetMatSpecular(const aiMaterial &mat, glTF2::MaterialSpecula
     } else if (colorFactorIsZero) {
         specular.specularColorFactor[0] = specular.specularColorFactor[1] = specular.specularColorFactor[2] = 1.0f;
     }
-    GetMatTex(mat, specular.specularColorTexture, aiTextureType_SPECULAR);
-    GetMatTex(mat, specular.specularTexture, aiTextureType_SPECULAR);
+    GetMatTex(mat, specular.specularIntensityTexture, aiTextureType_PBR_SPECULAR, 0);
+    GetMatTex(mat, specular.specularColorTexture, aiTextureType_PBR_SPECULAR, 1);
     return true;
 }
 
@@ -776,6 +789,7 @@ bool glTF2Exporter::GetMatClearcoat(const aiMaterial &mat, glTF2::MaterialClearc
         return false;
 
     mat.Get(AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, clearcoat.clearcoatRoughnessFactor);
+    GetMatVector2(mat, clearcoat.clearcoatNormalScale, AI_MATKEY_CLEARCOAT_NORMAL_SCALE);
 
     GetMatTex(mat, clearcoat.clearcoatTexture, aiTextureType_CLEARCOAT, 0);
     GetMatTex(mat, clearcoat.clearcoatRoughnessTexture, aiTextureType_CLEARCOAT, 1);
@@ -796,7 +810,6 @@ bool glTF2Exporter::GetMatIridescence(const aiMaterial &mat, glTF2::MaterialIrid
     mat.Get(AI_MATKEY_IRIDESCENCE_IOR, iridescence.iridescenceIor);
     mat.Get(AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM, iridescence.iridescenceThicknessMinimum);
     mat.Get(AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM, iridescence.iridescenceThicknessMaximum);
-    mat.Get(AI_MATKEY_IRIDESCENCE_THICKNESS_RANGE, iridescence.iridescenceThicknessRange);
 
     GetMatTex(mat, iridescence.iridescenceTexture, aiTextureType_IRIDESCENCE, 0);
     GetMatTex(mat, iridescence.iridescenceThicknessTexture, aiTextureType_IRIDESCENCE, 1);
@@ -830,10 +843,10 @@ bool glTF2Exporter::GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTra
 bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume) {
     bool result = mat.Get(AI_MATKEY_VOLUME_THICKNESS_FACTOR, volume.thicknessFactor) != aiReturn_SUCCESS;
 
-    GetMatTex(mat, volume.thicknessTexture, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
-
+    result = result || GetMatColor(mat, volume.attenuationColor, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
     result = result || mat.Get(AI_MATKEY_VOLUME_ATTENUATION_DISTANCE, volume.attenuationDistance);
-    result = result || GetMatColor(mat, volume.attenuationColor, AI_MATKEY_VOLUME_ATTENUATION_COLOR) != aiReturn_SUCCESS;
+
+    GetMatTex(mat, volume.thicknessTexture, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
 
     // Valid if any of these properties are available
     return result || volume.thicknessTexture.texture;
@@ -914,10 +927,22 @@ void glTF2Exporter::ExportMaterials() {
         GetMatColor(mat, m->emissiveFactor, AI_MATKEY_COLOR_EMISSIVE);
 
         mat.Get(AI_MATKEY_TWOSIDED, m->doubleSided);
-        mat.Get(AI_MATKEY_GLTF_ALPHACUTOFF, m->alphaCutoff);
 
         float opacity;
+        float alphaCut;
+        float reflect;
         aiString alphaMode;
+
+        if (mat.Get(AI_MATKEY_ALPHACUTOFF, alphaCut) == AI_SUCCESS) {
+            if (alphaCut > 0) {
+                m->alphaCutoff = alphaCut;
+                m->alphaMode = "MASK";
+            }
+        }
+
+        if (mat.Get(AI_MATKEY_REFLECTIVITY, reflect) == AI_SUCCESS) {
+            m->reflectivity = reflect;
+        }
 
         if (mat.Get(AI_MATKEY_OPACITY, opacity) == AI_SUCCESS) {
             if (opacity < 1) {
@@ -925,6 +950,7 @@ void glTF2Exporter::ExportMaterials() {
                 m->pbrMetallicRoughness.baseColorFactor[3] *= opacity;
             }
         }
+
         if (mat.Get(AI_MATKEY_GLTF_ALPHAMODE, alphaMode) == AI_SUCCESS) {
             m->alphaMode = alphaMode.C_Str();
         }

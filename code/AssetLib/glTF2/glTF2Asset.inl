@@ -182,6 +182,11 @@ void SetVector(vec3 &v, const float (&in)[3]) {
     v[2] = in[2];
 }
 
+void SetVector(vec2 &v, const float (&in)[2]) {
+    v[0] = in[0];
+    v[1] = in[1];
+}
+
 template <int N>
 inline int Compare(const char *attr, const char (&str)[N]) {
     return (strncmp(attr, str, N - 1) == 0) ? N - 1 : 0;
@@ -1281,7 +1286,7 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialSpecular specular;
 
                 ReadMember(*curMatSpecular, "specularFactor", specular.specularFactor);
-                ReadTextureProperty(r, *curMatSpecular, "specularTexture", specular.specularTexture);
+                ReadTextureProperty(r, *curMatSpecular, "specularIntensityTexture", specular.specularIntensityTexture);
                 ReadMember(*curMatSpecular, "specularColorFactor", specular.specularColorFactor);
                 ReadTextureProperty(r, *curMatSpecular, "specularColorTexture", specular.specularColorTexture);
 
@@ -1296,8 +1301,8 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialSheen sheen;
 
                 ReadMember(*curMaterialSheen, "sheenColorFactor", sheen.sheenColorFactor);
-                ReadTextureProperty(r, *curMaterialSheen, "sheenColorTexture", sheen.sheenColorTexture);
                 ReadMember(*curMaterialSheen, "sheenRoughnessFactor", sheen.sheenRoughnessFactor);
+                ReadTextureProperty(r, *curMaterialSheen, "sheenColorTexture", sheen.sheenColorTexture);
                 ReadTextureProperty(r, *curMaterialSheen, "sheenRoughnessTexture", sheen.sheenRoughnessTexture);
 
                 this->materialSheen = Nullable<MaterialSheen>(sheen);
@@ -1309,8 +1314,9 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialClearcoat clearcoat;
 
                 ReadMember(*curMaterialClearcoat, "clearcoatFactor", clearcoat.clearcoatFactor);
-                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatTexture", clearcoat.clearcoatTexture);
                 ReadMember(*curMaterialClearcoat, "clearcoatRoughnessFactor", clearcoat.clearcoatRoughnessFactor);
+                ReadMember(*curMaterialClearcoat, "clearcoatNormalScale", clearcoat.clearcoatNormalScale);
+                ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatTexture", clearcoat.clearcoatTexture);
                 ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatRoughnessTexture", clearcoat.clearcoatRoughnessTexture);
                 ReadTextureProperty(r, *curMaterialClearcoat, "clearcoatNormalTexture", clearcoat.clearcoatNormalTexture);
 
@@ -1323,11 +1329,10 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialIridescence iridescence;
 
                 ReadMember(*curMaterialIridescence, "iridescenceFactor", iridescence.iridescenceFactor);
-                ReadTextureProperty(r, *curMaterialIridescence, "iridescenceTexture", iridescence.iridescenceTexture);
                 ReadMember(*curMaterialIridescence, "iridescenceIor", iridescence.iridescenceIor);
                 ReadMember(*curMaterialIridescence, "iridescenceThicknessMinimum", iridescence.iridescenceThicknessMinimum);
                 ReadMember(*curMaterialIridescence, "iridescenceThicknessMaximum", iridescence.iridescenceThicknessMaximum);
-                ReadMember(*curMaterialIridescence, "iridescenceThicknessRange", iridescence.iridescenceThicknessRange);
+                ReadTextureProperty(r, *curMaterialIridescence, "iridescenceTexture", iridescence.iridescenceTexture);
                 ReadTextureProperty(r, *curMaterialIridescence, "iridescenceThicknessTexture", iridescence.iridescenceThicknessTexture);
 
                 this->materialIridescence = Nullable<MaterialIridescence>(iridescence);
@@ -1339,9 +1344,9 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialAnisotropy anisotropy;
 
                 ReadMember(*curMaterialAnisotropy, "anisotropyFactor", anisotropy.anisotropyFactor);
-                ReadTextureProperty(r, *curMaterialAnisotropy, "anisotropyTexture", anisotropy.anisotropyTexture);
                 ReadMember(*curMaterialAnisotropy, "anisotropyStrength", anisotropy.anisotropyStrength);
                 ReadMember(*curMaterialAnisotropy, "anisotropyRotation", anisotropy.anisotropyRotation);
+                ReadTextureProperty(r, *curMaterialAnisotropy, "anisotropyTexture", anisotropy.anisotropyTexture);
 
                 this->materialAnisotropy = Nullable<MaterialAnisotropy>(anisotropy);
             }
@@ -1363,9 +1368,9 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialVolume volume;
 
                 ReadMember(*curMaterialVolume, "thicknessFactor", volume.thicknessFactor);
-                ReadTextureProperty(r, *curMaterialVolume, "thicknessTexture", volume.thicknessTexture);
-                ReadMember(*curMaterialVolume, "attenuationDistance", volume.attenuationDistance);
                 ReadMember(*curMaterialVolume, "attenuationColor", volume.attenuationColor);
+                ReadMember(*curMaterialVolume, "attenuationDistance", volume.attenuationDistance);
+                ReadTextureProperty(r, *curMaterialVolume, "thicknessTexture", volume.thicknessTexture);
 
                 this->materialVolume = Nullable<MaterialVolume>(volume);
             }
@@ -1375,7 +1380,7 @@ inline void Material::Read(Value &material, Asset &r) {
             if (Value *curMaterialIOR = FindObject(*extensions, "KHR_materials_ior")) {
                 MaterialIOR ior;
 
-                ReadMember(*curMaterialIOR, "ior", ior.ior);
+                ReadMember(*curMaterialIOR, "refracti", ior.ior);
 
                 this->materialIOR = Nullable<MaterialIOR>(ior);
             }
@@ -1403,7 +1408,8 @@ inline void Material::SetDefaults() {
 
     SetVector(emissiveFactor, defaultEmissiveFactor);
     alphaMode = "OPAQUE";
-    alphaCutoff = 0.5f;
+    alphaCutoff = 0.f;
+    reflectivity = 1.0f;
     doubleSided = false;
     unlit = false;
 }
@@ -1417,8 +1423,8 @@ inline void PbrSpecularGlossiness::SetDefaults() {
 
 inline void MaterialSpecular::SetDefaults() {
     //KHR_materials_specular properties
-    SetVector(specularColorFactor, defaultSpecularColorFactor);
     specularFactor = 0.f;
+    SetVector(specularColorFactor, defaultSpecularColorFactor);
 }
 
 inline void MaterialSheen::SetDefaults() {
@@ -1429,29 +1435,36 @@ inline void MaterialSheen::SetDefaults() {
 
 inline void MaterialClearcoat::SetDefaults() {
     //KHR_materials_clearcoat properties
+    clearcoatFactor = 0.f;
+    SetVector(clearcoatNormalScale, defaultClearcoatNormalScale);
     clearcoatRoughnessFactor = 0.f;
 }
 
 inline void MaterialIridescence::SetDefaults() {
     //KHR_materials_iridescence properties
+    iridescenceFactor = 0.f;
     iridescenceIor = 1.3f;
     iridescenceThicknessMinimum = 100.f;
     iridescenceThicknessMaximum = 400.f;
-    iridescenceThicknessRange[0] = 100.f;
-    iridescenceThicknessRange[1] = 400.f;
 }
 
-inline void MaterialAnisotropy::SetDefaults() {
-    //KHR_materials_anisotropy properties
-    anisotropyStrength = 0.f;
-    anisotropyRotation = 0.f;
+inline void MaterialTransmission::SetDefaults() {
+    //KHR_materials_transmission properties
+    transmissionFactor = 0.f;
 }
 
 inline void MaterialVolume::SetDefaults() {
     //KHR_materials_volume properties
     thicknessFactor = 0.f;
-    attenuationDistance = INFINITY;
-    SetVector(attenuationColor, defaultAttenuationColor);
+    attenuationDistance = 0.f;
+    SetVector(attenuationColor, defaultAttenuationColorFactor);
+}
+
+inline void MaterialAnisotropy::SetDefaults() {
+    //KHR_materials_anisotropy properties
+    anisotropyFactor = 0.f;
+    anisotropyStrength = 0.f;
+    anisotropyRotation = 0.f;
 }
 
 inline void MaterialIOR::SetDefaults() {

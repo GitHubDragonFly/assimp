@@ -379,6 +379,10 @@ namespace glTF2 {
             WriteFloat(obj, m.alphaCutoff, "alphaCutoff", w.mAl);
         }
 
+        if (m.reflectivity != 1.0) {
+            WriteFloat(obj, m.reflectivity, "reflectivity", w.mAl);
+        }
+
         if (m.alphaMode != "OPAQUE") {
             obj.AddMember("alphaMode", Value(m.alphaMode, w.mAl).Move(), w.mAl);
         }
@@ -424,11 +428,9 @@ namespace glTF2 {
 
             MaterialSpecular &specular = m.materialSpecular.value;
 
-            if (specular.specularFactor != 0.0f) {
+            if (specular.specularFactor != 0.f) {
                 WriteFloat(materialSpecular, specular.specularFactor, "specularFactor", w.mAl);
-                WriteTex(materialSpecular, specular.specularTexture, "specularTexture", w.mAl);
-            }
-            if (specular.specularColorFactor[0] != defaultSpecularColorFactor[0] && specular.specularColorFactor[1] != defaultSpecularColorFactor[1] && specular.specularColorFactor[2] != defaultSpecularColorFactor[2]) {
+                WriteTex(materialSpecular, specular.specularIntensityTexture, "specularIntensityTexture", w.mAl);
                 WriteVec(materialSpecular, specular.specularColorFactor, "specularColorFactor", w.mAl);
                 WriteTex(materialSpecular, specular.specularColorTexture, "specularColorTexture", w.mAl);
             }
@@ -464,6 +466,7 @@ namespace glTF2 {
 
             if (clearcoat.clearcoatFactor != 0.f) {
                 WriteFloat(materialClearcoat, clearcoat.clearcoatFactor, "clearcoatFactor", w.mAl);
+                WriteVec(materialClearcoat, clearcoat.clearcoatNormalScale, "clearcoatNormalScale", defaultClearcoatNormalScale, w.mAl);
             }
 
             if (clearcoat.clearcoatRoughnessFactor != 0.f) {
@@ -557,13 +560,13 @@ namespace glTF2 {
                 WriteFloat(materialVolume, volume.thicknessFactor, "thicknessFactor", w.mAl);
             }
 
-            WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
+            WriteVec(materialVolume, volume.attenuationColor, "attenuationColor", defaultAttenuationColorFactor, w.mAl);
 
-            if (volume.attenuationDistance != INFINITY) {
+            if (volume.attenuationDistance != 0.f) {
                 WriteFloat(materialVolume, volume.attenuationDistance, "attenuationDistance", w.mAl);
             }
 
-            WriteVec(materialVolume, volume.attenuationColor, "attenuationColor", defaultAttenuationColor, w.mAl);
+            WriteTex(materialVolume, volume.thicknessTexture, "thicknessTexture", w.mAl);
 
             if (!materialVolume.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_volume", materialVolume, w.mAl);
