@@ -650,13 +650,12 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         }
         if (pCurrentMaterial->transmission)
             mat->AddProperty(&pCurrentMaterial->transmission.Get(), 1, AI_MATKEY_TRANSMISSION_FACTOR);
-        if (pCurrentMaterial->thickness) {
+        if (pCurrentMaterial->thickness)
             mat->AddProperty(&pCurrentMaterial->thickness.Get(), 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
-            if (pCurrentMaterial->attenuation_color)
-                mat->AddProperty(&pCurrentMaterial->attenuation_color.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
-            if (pCurrentMaterial->attenuation_distance)
-                mat->AddProperty(&pCurrentMaterial->attenuation_distance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
-        }
+        if (pCurrentMaterial->attenuation_color)
+            mat->AddProperty(&pCurrentMaterial->attenuation_color.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+        if (pCurrentMaterial->attenuation_distance)
+            mat->AddProperty(&pCurrentMaterial->attenuation_distance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
         if (pCurrentMaterial->anisotropy) {
             mat->AddProperty(&pCurrentMaterial->anisotropy.Get(), 1, AI_MATKEY_ANISOTROPY_FACTOR);
             if (pCurrentMaterial->anisotropy_strength)

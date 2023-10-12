@@ -271,6 +271,7 @@ struct Material {
             anisotropy(),
             anisotropy_rotation(),
             anisotropy_strength(),
+            specularFactor(),
             specularColorFactor(),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
