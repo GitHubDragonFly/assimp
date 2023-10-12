@@ -271,6 +271,19 @@ aiReturn aiGetMaterialColor(const aiMaterial *pMat,
 }
 
 // ------------------------------------------------------------------------------------------------
+// Get a vector2 (2 floats) from the material
+aiReturn aiGetMaterialVector2(const aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        aiVector2D *pOut) {
+    unsigned int iMax = 2;
+    const aiReturn eRet = aiGetMaterialFloatArray(pMat, pKey, type, index, (ai_real *)pOut, &iMax);
+
+    return eRet;
+}
+
+// ------------------------------------------------------------------------------------------------
 // Get a aiUVTransform (5 floats) from the material
 aiReturn aiGetMaterialUVTransform(const aiMaterial *pMat,
         const char *pKey,
