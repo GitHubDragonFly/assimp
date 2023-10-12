@@ -419,6 +419,7 @@ void ObjFileParser::getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std
 
 void ObjFileParser::getVector2(std::vector<aiVector2D> &point2d_array) {
     ai_real x, y;
+
     copyNextWord(m_buffer, Buffersize);
     x = (ai_real)fast_atof(m_buffer);
 

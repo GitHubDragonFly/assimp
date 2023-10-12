@@ -105,7 +105,7 @@ protected:
     void getHomogeneousVector3(std::vector<aiVector3D> &point3d_array);
     /// Stores the following two 3d vectors on the line.
     void getTwoVectors3(std::vector<aiVector3D> &point3d_array_a, std::vector<aiVector3D> &point3d_array_b);
-    /// Stores the following 3d vector.
+    /// Stores the following 2d vector.
     void getVector2(std::vector<aiVector2D> &point2d_array);
     /// Stores the following face.
     void getFace(aiPrimitiveType type);

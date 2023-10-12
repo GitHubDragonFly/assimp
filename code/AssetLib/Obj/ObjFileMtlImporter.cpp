@@ -47,7 +47,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <assimp/ParsingUtils.h>
 #include <assimp/fast_atof.h>
 #include <assimp/material.h>
+#include <assimp/vector2.h>
 #include <stdlib.h>
+#include <iostream>
 #include <assimp/DefaultLogger.hpp>
 
 namespace Assimp {
@@ -80,6 +82,8 @@ static constexpr char ThicknessTexture[] = "map_Pth";
 static constexpr char TransmissionTexture[] = "map_Ptr";
 static constexpr char AnisotropyTexture[] = "map_Pa";
 static constexpr char RMATexture[] = "map_Px";
+static constexpr char SpecularIntensityTexture[] = "map_Psi";
+static constexpr char SpecularColorTexture[] = "map_Psp";
 
 // texture option specific token
 static constexpr char BlendUOption[] = "-blendu";
@@ -130,8 +134,8 @@ void ObjFileMtlImporter::load() {
             case 'k':
             case 'K': {
                 ++m_DataIt;
-                if (*m_DataIt == 'a') // Ambient color
-                {
+                if (*m_DataIt == 'a') {
+                    // Ambient color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->ambient);
@@ -141,10 +145,12 @@ void ObjFileMtlImporter::load() {
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->diffuse);
                 } else if (*m_DataIt == 's') {
+                    // Specular color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->specular);
                 } else if (*m_DataIt == 'e') {
+                    // Emissive color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->emissive);
@@ -153,8 +159,8 @@ void ObjFileMtlImporter::load() {
             } break;
             case 'T': {
                 ++m_DataIt;
-                // Material transmission color
-                if (*m_DataIt == 'f')  {
+                if (*m_DataIt == 'f') {
+                    // Material transmission color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->transparent);
@@ -177,58 +183,58 @@ void ObjFileMtlImporter::load() {
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getFloatValue(m_pModel->mCurrentMaterial->alpha);
-                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
                 }
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
-
             case 'N':
             case 'n': {
                 ++m_DataIt;
                 switch (*m_DataIt) {
-                    case 's': // Specular exponent
+                    case 's':
+                        // Specular exponent
                         ++m_DataIt;
                         if (m_pModel->mCurrentMaterial != nullptr)
                             getFloatValue(m_pModel->mCurrentMaterial->shininess);
                         break;
-                    case 'i': // Index Of refraction
+                    case 'i':
+                        // Index Of refraction
                         ++m_DataIt;
                         if (m_pModel->mCurrentMaterial != nullptr)
-                            getFloatValue(m_pModel->mCurrentMaterial->ior);
+                            getFloatValue(m_pModel->mCurrentMaterial->iorFactor);
                         break;
-                    case 'e': // New material
+                    case 'e':
+                        // New material
                         createMaterial();
                         break;
-                    case 'o': // Norm texture
+                    case 'o':
+                        // Norm texture
                         --m_DataIt;
                         getTexture();
                         break;
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
-
-            case 'P':
-                {
-                    ++m_DataIt;
-                    switch(*m_DataIt)
-                    {
+            case 'P': {
+                ++m_DataIt;
+                switch(*m_DataIt) {
                     case 'a':
                         ++m_DataIt;
                         if (*m_DataIt == 'd') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
-                                getFloatValue(m_pModel->mCurrentMaterial->attenuationDistance);
+                                getFloatValue(m_pModel->mCurrentMaterial->attenuation_distance);
                         } else if (*m_DataIt == 'c') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
-                                getColorRGBA(m_pModel->mCurrentMaterial->attenuationColor);
+                                getColorRGBA(m_pModel->mCurrentMaterial->attenuation_color);
                         } else if (*m_DataIt == 'r') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
-                                getFloatValue(m_pModel->mCurrentMaterial->anisotropyRotation);
+                                getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
                         } else if (*m_DataIt == 's') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
-                                getFloatValue(m_pModel->mCurrentMaterial->anisotropyStrength);
+                                getFloatValue(m_pModel->mCurrentMaterial->anisotropy_strength);
                         } else {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
@@ -246,13 +252,11 @@ void ObjFileMtlImporter::load() {
                                 ++m_DataIt;
                                 if (m_pModel->mCurrentMaterial != nullptr) {
                                     getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessMinimum);
-                                    getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessRange[0]);
                                 }
                             } else if (*m_DataIt == 'y') {
                                 ++m_DataIt;
                                 if (m_pModel->mCurrentMaterial != nullptr) {
                                     getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessMaximum);
-                                    getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessRange[1]);
                                 }
                             }
                         } else {
@@ -260,10 +264,21 @@ void ObjFileMtlImporter::load() {
                                 getFloatValue(m_pModel->mCurrentMaterial->iridescence);
                         }
                         break;
-                    case 'r':
+                    case 'e':
                         ++m_DataIt;
                         if (m_pModel->mCurrentMaterial != nullptr)
-                            getFloatValue(m_pModel->mCurrentMaterial->roughness);
+                            getFloatValue(m_pModel->mCurrentMaterial->emissiveIntensityFactor);
+                        break;
+                    case 'r':
+                        ++m_DataIt;
+                        if (*m_DataIt == 'f') {
+                            ++m_DataIt;
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->reflectivityFactor);
+                        } else {
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->roughness);
+                        }
                         break;
                     case 'm':
                         ++m_DataIt;
@@ -276,6 +291,14 @@ void ObjFileMtlImporter::load() {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->sheen_roughness);
+                        } else if (*m_DataIt == 'i') {
+                            ++m_DataIt;
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->specularFactor);
+                        } else if (*m_DataIt == 'p') {
+                            ++m_DataIt;
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getColorRGBA(m_pModel->mCurrentMaterial->specularColorFactor);
                         } else {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getColorRGBA(m_pModel->mCurrentMaterial->sheen);
@@ -283,14 +306,14 @@ void ObjFileMtlImporter::load() {
                         break;
                     case 't':
                         ++m_DataIt;
-                        if (*m_DataIt == 'r') {
-                            ++m_DataIt;
-                            if (m_pModel->mCurrentMaterial != nullptr)
-                                getFloatValue(m_pModel->mCurrentMaterial->transmission);
-                        } else if (*m_DataIt == 'h') {
+                        if (*m_DataIt == 'h') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->thickness);
+                        } else if (*m_DataIt == 'r') {
+                            ++m_DataIt;
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getFloatValue(m_pModel->mCurrentMaterial->transmission);
                         }
                         break;
                     case 'c':
@@ -303,29 +326,42 @@ void ObjFileMtlImporter::load() {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_thickness);
+                        } else if (*m_DataIt == 'n') {
+                            ++m_DataIt;
+                            if (m_pModel->mCurrentMaterial != nullptr)
+                                getVector2Values(m_pModel->mCurrentMaterial->clearcoat_NormalScale);
                         }
                         break;
-                    }
-                    m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
                 }
-                break;
-
-            case 'm': // Texture
-            case 'b': // quick'n'dirty - for 'bump' sections
-            case 'r': // quick'n'dirty - for 'refl' sections
-            {
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+            case 'm':
+            case 'b':
+            case 'r': {
                 getTexture();
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
-
-            case 'i': // Illumination model
-            {
+            case 'a': {
+                // alphaCutoff
+                ++m_DataIt;
+                if (m_pModel->mCurrentMaterial != nullptr)
+                    getFloatValue(m_pModel->mCurrentMaterial->alphaCutoff);
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+            case 's': {
+                // material side (doubleSided)
+                ++m_DataIt;
+                if (m_pModel->mCurrentMaterial != nullptr)
+                    getBoolValue(m_pModel->mCurrentMaterial->twosided);
+                m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
+            } break;
+            case 'i': {
+                // Illumination model
                 m_DataIt = getNextToken<DataArrayIt>(m_DataIt, m_DataItEnd);
                 if (m_pModel->mCurrentMaterial != nullptr)
                     getIlluminationModel(m_pModel->mCurrentMaterial->illumination_model);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
-
             default: {
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -387,6 +423,42 @@ void ObjFileMtlImporter::getFloatValue(Maybe<ai_real> &value) {
         value = Maybe<ai_real>(fast_atof(&m_buffer[0]));
     else
         value = Maybe<ai_real>();
+}
+
+// -------------------------------------------------------------------
+//  Loads a single bool value.
+void ObjFileMtlImporter::getBoolValue(bool &value) {
+    m_DataIt = CopyNextWord<DataArrayIt>(m_DataIt, m_DataItEnd, &m_buffer[0], BUFFERSIZE);
+    size_t len = std::strlen(&m_buffer[0]);
+    if (0 == len) {
+        value = false;
+        return;
+    }
+
+    value = (bool)(static_cast<unsigned int>(fast_atof(&m_buffer[0])) == 2);
+}
+
+// -------------------------------------------------------------------
+//  Loads a vector2 float values.
+void ObjFileMtlImporter::getVector2Values(aiVector2D &value) {
+    ai_real x(0.0), y(0.0);
+
+    m_DataIt = getFloat<DataArrayIt>(m_DataIt, m_DataItEnd, x);
+
+    value.x = x;
+
+    if (!IsLineEnd(*m_DataIt)) {
+        m_DataIt = getFloat<DataArrayIt>(m_DataIt, m_DataItEnd, y);
+    }
+
+    value.y = y;
+}
+
+// -------------------------------------------------------------------
+void ObjFileMtlImporter::getVector2Values(Maybe<aiVector2D> &value) {
+    aiVector2D v;
+    getVector2Values(v);
+    value = Maybe<aiVector2D>(v);
 }
 
 // -------------------------------------------------------------------
@@ -452,6 +524,11 @@ void ObjFileMtlImporter::getTexture() {
         // Ambient texture
         out = &m_pModel->mCurrentMaterial->textureAmbient;
         clampIndex = ObjFile::Material::TextureAmbientType;
+    } else if (!ASSIMP_strincmp(pPtr, EmissiveTexture1, static_cast<unsigned int>(strlen(EmissiveTexture1))) ||
+               !ASSIMP_strincmp(pPtr, EmissiveTexture2, static_cast<unsigned int>(strlen(EmissiveTexture2)))) {
+        // Emissive texture
+        out = &m_pModel->mCurrentMaterial->textureEmissive;
+        clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if (!ASSIMP_strincmp(pPtr, SpecularTexture, static_cast<unsigned int>(strlen(SpecularTexture)))) {
         // Specular texture
         out = &m_pModel->mCurrentMaterial->textureSpecular;
@@ -465,11 +542,6 @@ void ObjFileMtlImporter::getTexture() {
         // Opacity texture
         out = &m_pModel->mCurrentMaterial->textureOpacity;
         clampIndex = ObjFile::Material::TextureOpacityType;
-    } else if (!ASSIMP_strincmp(pPtr, EmissiveTexture1, static_cast<unsigned int>(strlen(EmissiveTexture1))) ||
-               !ASSIMP_strincmp(pPtr, EmissiveTexture2, static_cast<unsigned int>(strlen(EmissiveTexture2)))) {
-        // Emissive texture
-        out = &m_pModel->mCurrentMaterial->textureEmissive;
-        clampIndex = ObjFile::Material::TextureEmissiveType;
     } else if (!ASSIMP_strincmp(pPtr, BumpTexture1, static_cast<unsigned int>(strlen(BumpTexture1))) ||
                !ASSIMP_strincmp(pPtr, BumpTexture2, static_cast<unsigned int>(strlen(BumpTexture2)))) {
         // Bump texture
@@ -539,6 +611,14 @@ void ObjFileMtlImporter::getTexture() {
         // PBR Rough/Metal/AO texture
         out = &m_pModel->mCurrentMaterial->textureRMA;
         clampIndex = ObjFile::Material::TextureRMAType;
+    } else if (!ASSIMP_strincmp(pPtr, SpecularColorTexture, static_cast<unsigned int>(strlen(SpecularColorTexture)))) {
+        // PBR Specular Color texture
+        out = &m_pModel->mCurrentMaterial->textureSpecularColor;
+        clampIndex = ObjFile::Material::TexturePBRSpecularType;
+    } else if (!ASSIMP_strincmp(pPtr, SpecularIntensityTexture, static_cast<unsigned int>(strlen(SpecularIntensityTexture)))) {
+        // PBR Specular Intensity texture
+        out = &m_pModel->mCurrentMaterial->textureSpecularIntensity;
+        clampIndex = ObjFile::Material::TexturePBRSpecularType;
     } else {
         ASSIMP_LOG_ERROR("OBJ/MTL: Encountered unknown texture type");
         return;

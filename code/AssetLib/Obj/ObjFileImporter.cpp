@@ -613,48 +613,70 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         // Adding material colors
         mat->AddProperty(&pCurrentMaterial->ambient, 1, AI_MATKEY_COLOR_AMBIENT);
         mat->AddProperty(&pCurrentMaterial->diffuse, 1, AI_MATKEY_COLOR_DIFFUSE);
-        mat->AddProperty(&pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR);
         mat->AddProperty(&pCurrentMaterial->emissive, 1, AI_MATKEY_COLOR_EMISSIVE);
+        mat->AddProperty(&pCurrentMaterial->specular, 1, AI_MATKEY_COLOR_SPECULAR);
         mat->AddProperty(&pCurrentMaterial->shininess, 1, AI_MATKEY_SHININESS);
         mat->AddProperty(&pCurrentMaterial->alpha, 1, AI_MATKEY_OPACITY);
         mat->AddProperty(&pCurrentMaterial->transparent, 1, AI_MATKEY_COLOR_TRANSPARENT);
-        if (pCurrentMaterial->roughness)
-            mat->AddProperty(&pCurrentMaterial->roughness.Get(), 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        if (pCurrentMaterial->alphaCutoff)
+            mat->AddProperty(&pCurrentMaterial->alphaCutoff, 1, AI_MATKEY_ALPHACUTOFF);
+        if (pCurrentMaterial->twosided)
+            mat->AddProperty(&pCurrentMaterial->twosided, 1, AI_MATKEY_TWOSIDED);
+        if (pCurrentMaterial->reflectivityFactor)
+            mat->AddProperty(&pCurrentMaterial->reflectivityFactor, 1, AI_MATKEY_REFLECTIVITY);
         if (pCurrentMaterial->metallic)
             mat->AddProperty(&pCurrentMaterial->metallic.Get(), 1, AI_MATKEY_METALLIC_FACTOR);
-        if (pCurrentMaterial->sheen)
+        if (pCurrentMaterial->roughness)
+            mat->AddProperty(&pCurrentMaterial->roughness.Get(), 1, AI_MATKEY_ROUGHNESS_FACTOR);
+        if (pCurrentMaterial->sheen) {
             mat->AddProperty(&pCurrentMaterial->sheen.Get(), 1, AI_MATKEY_SHEEN_COLOR_FACTOR);
-        if (pCurrentMaterial->sheen_roughness)
-            mat->AddProperty(&pCurrentMaterial->sheen_roughness.Get(), 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
-        if (pCurrentMaterial->clearcoat_thickness)
+            if (pCurrentMaterial->sheen_roughness)
+                mat->AddProperty(&pCurrentMaterial->sheen_roughness.Get(), 1, AI_MATKEY_SHEEN_ROUGHNESS_FACTOR);
+        }
+        if (pCurrentMaterial->clearcoat_thickness) {
             mat->AddProperty(&pCurrentMaterial->clearcoat_thickness.Get(), 1, AI_MATKEY_CLEARCOAT_FACTOR);
-        if (pCurrentMaterial->clearcoat_roughness)
-            mat->AddProperty(&pCurrentMaterial->clearcoat_roughness.Get(), 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
-        if (pCurrentMaterial->iridescence)
+            if (pCurrentMaterial->clearcoat_roughness)
+                mat->AddProperty(&pCurrentMaterial->clearcoat_roughness.Get(), 1, AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR);
+            mat->AddProperty(&pCurrentMaterial->clearcoat_NormalScale.Get(), 1, AI_MATKEY_CLEARCOAT_NORMAL_SCALE);
+        }
+        if (pCurrentMaterial->iridescence) {
             mat->AddProperty(&pCurrentMaterial->iridescence.Get(), 1, AI_MATKEY_IRIDESCENCE_FACTOR);
-        if (pCurrentMaterial->iridescenceIor)
-            mat->AddProperty(&pCurrentMaterial->iridescenceIor.Get(), 1, AI_MATKEY_IRIDESCENCE_IOR);
-        if (pCurrentMaterial->iridescenceThicknessMinimum)
-            mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMinimum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM);
-        if (pCurrentMaterial->iridescenceThicknessMaximum)
-            mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMaximum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM);
+            if (pCurrentMaterial->iridescenceIor)
+                mat->AddProperty(&pCurrentMaterial->iridescenceIor.Get(), 1, AI_MATKEY_IRIDESCENCE_IOR);
+            if (pCurrentMaterial->iridescenceThicknessMinimum)
+                mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMinimum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM);
+            if (pCurrentMaterial->iridescenceThicknessMaximum)
+                mat->AddProperty(&pCurrentMaterial->iridescenceThicknessMaximum.Get(), 1, AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM);
+        }
         if (pCurrentMaterial->transmission)
             mat->AddProperty(&pCurrentMaterial->transmission.Get(), 1, AI_MATKEY_TRANSMISSION_FACTOR);
-        if (pCurrentMaterial->thickness)
+        if (pCurrentMaterial->thickness) {
             mat->AddProperty(&pCurrentMaterial->thickness.Get(), 1, AI_MATKEY_VOLUME_THICKNESS_FACTOR);
-        if (pCurrentMaterial->attenuationDistance) {
-            mat->AddProperty(&pCurrentMaterial->attenuationColor.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
-            mat->AddProperty(&pCurrentMaterial->attenuationDistance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
+            if (pCurrentMaterial->attenuation_color)
+                mat->AddProperty(&pCurrentMaterial->attenuation_color.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+            if (pCurrentMaterial->attenuation_distance)
+                mat->AddProperty(&pCurrentMaterial->attenuation_distance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
         }
-        if (pCurrentMaterial->anisotropy)
+        if (pCurrentMaterial->anisotropy) {
             mat->AddProperty(&pCurrentMaterial->anisotropy.Get(), 1, AI_MATKEY_ANISOTROPY_FACTOR);
-        if (pCurrentMaterial->anisotropyStrength)
-            mat->AddProperty(&pCurrentMaterial->anisotropyStrength.Get(), 1, AI_MATKEY_ANISOTROPY_STRENGTH);
-        if (pCurrentMaterial->anisotropyRotation)
-            mat->AddProperty(&pCurrentMaterial->anisotropyRotation.Get(), 1, AI_MATKEY_ANISOTROPY_ROTATION);
+            if (pCurrentMaterial->anisotropy_strength)
+                mat->AddProperty(&pCurrentMaterial->anisotropy_strength.Get(), 1, AI_MATKEY_ANISOTROPY_STRENGTH);
+            if (pCurrentMaterial->anisotropy_rotation)
+                mat->AddProperty(&pCurrentMaterial->anisotropy_rotation.Get(), 1, AI_MATKEY_ANISOTROPY_ROTATION);
+        }
+        if (pCurrentMaterial->specularFactor) {
+            mat->AddProperty(&pCurrentMaterial->specularFactor.Get(), 1, AI_MATKEY_PBR_SPECULAR_FACTOR);
+            if (pCurrentMaterial->specularColorFactor)
+                mat->AddProperty(&pCurrentMaterial->specularColorFactor.Get(), 1, AI_MATKEY_PBR_SPECULAR_COLOR_FACTOR);
+        }
 
         // Adding refraction index
-        mat->AddProperty(&pCurrentMaterial->ior, 1, AI_MATKEY_REFRACTI);
+        if (pCurrentMaterial->iorFactor)
+            mat->AddProperty(&pCurrentMaterial->iorFactor, 1, AI_MATKEY_REFRACTI);
+
+        // Adding emissive intensity
+        if (pCurrentMaterial->emissiveIntensityFactor)
+            mat->AddProperty(&pCurrentMaterial->emissiveIntensityFactor, 1, AI_MATKEY_EMISSIVE_INTENSITY);
 
         // Adding textures
         const int uvwIndex = 0;
@@ -851,6 +873,22 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_UNKNOWN, 0 );
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureRMAType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_UNKNOWN);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSpecularColor.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSpecularColor, _AI_MATKEY_TEXTURE_BASE, aiTextureType_PBR_SPECULAR, 0);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_PBR_SPECULAR, 0 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TexturePBRSpecularType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_PBR_SPECULAR);
+            }
+        }
+
+        if (0 != pCurrentMaterial->textureSpecularIntensity.length) {
+            mat->AddProperty(&pCurrentMaterial->textureSpecularIntensity, _AI_MATKEY_TEXTURE_BASE, aiTextureType_PBR_SPECULAR, 1);
+            mat->AddProperty(&uvwIndex, 1, _AI_MATKEY_UVWSRC_BASE, aiTextureType_PBR_SPECULAR, 1 );
+            if (pCurrentMaterial->clamp[ObjFile::Material::TexturePBRSpecularType]) {
+                addTextureMappingModeProperty(mat, aiTextureType_PBR_SPECULAR);
             }
         }
 

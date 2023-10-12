@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_FILEDATA_H_INC
 
 #include <assimp/mesh.h>
-#include <assimp/types.h>
+#include <assimp/vector2.h>
 #include <map>
 #include <vector>
 #include "Common/Maybe.h"
@@ -145,6 +145,8 @@ struct Material {
     aiString textureTransmission;
     aiString textureAnisotropy;
     aiString textureRMA;
+    aiString textureSpecularIntensity;
+    aiString textureSpecularColor;
 
     enum TextureType {
         TextureDiffuseType = 0,
@@ -171,6 +173,7 @@ struct Material {
         TextureTransmissionType,
         TextureAnisotropyType,
         TextureRMAType,
+        TexturePBRSpecularType,
         TextureTypeCount
     };
     bool clamp[TextureTypeCount];
@@ -189,40 +192,50 @@ struct Material {
     ai_real shininess;
     //! Illumination model
     int illumination_model;
-    //! Index of refraction
-    ai_real ior;
     //! Transparency color
     aiColor3D transparent;
+    //! Alpha cutoff value
+    ai_real alphaCutoff;
+    //! Material doubleSided
+    bool twosided;
+    //! Index of refraction
+    ai_real iorFactor;
+    //! Material reflectivity
+    ai_real reflectivityFactor;
+    //! Emissive strength
+    ai_real emissiveIntensityFactor;
 
-    //! PBR Roughness
-    Maybe<ai_real> roughness;
     //! PBR Metallic
     Maybe<ai_real> metallic;
+    //! PBR Roughness
+    Maybe<ai_real> roughness;
     //! PBR Metallic
     Maybe<aiColor3D> sheen;
     //! PBR Sheen Roughness
     Maybe<ai_real> sheen_roughness;
-    //! PBR Clearcoat Thickness
+    //! PBR Clearcoat Thickness / Roughness / NormalScale
     Maybe<ai_real> clearcoat_thickness;
-    //! PBR Clearcoat Roughness
     Maybe<ai_real> clearcoat_roughness;
+    Maybe<aiVector2D> clearcoat_NormalScale;
     //! PBR Transmission
     Maybe<ai_real> transmission;
     //! PBR Volume Thickness
     Maybe<ai_real> thickness;
-    //! PBR Volume attenuation color / distance
-    Maybe<aiColor3D> attenuationColor;
-    Maybe<ai_real> attenuationDistance;
+    //! PBR Volume attenuation distance / color
+    Maybe<aiColor3D> attenuation_color;
+    Maybe<ai_real> attenuation_distance;
     //! PBR Iridescence
     Maybe<ai_real> iridescence;
     Maybe<ai_real> iridescenceIor;
     Maybe<ai_real> iridescenceThicknessMinimum;
     Maybe<ai_real> iridescenceThicknessMaximum;
-    Maybe<ai_real> iridescenceThicknessRange[2];
     //! PBR Anisotropy
     Maybe<ai_real> anisotropy;
-    Maybe<ai_real> anisotropyRotation;
-    Maybe<ai_real> anisotropyStrength;
+    Maybe<ai_real> anisotropy_rotation;
+    Maybe<ai_real> anisotropy_strength;
+    //! PBR Specular
+    Maybe<ai_real> specularFactor;
+    Maybe<aiColor3D> specularColorFactor;
 
     //! bump map multipler (normal map scalar)(-bm)
     ai_real bump_multiplier;
@@ -233,26 +246,31 @@ struct Material {
             alpha(ai_real(1.0)),
             shininess(ai_real(0.0)),
             illumination_model(1),
-            ior(ai_real(1.0)),
             transparent(ai_real(1.0), ai_real(1.0), ai_real(1.0)),
-            roughness(),
+            alphaCutoff(ai_real(0.0)),
+            twosided(false),
+            iorFactor(ai_real(1.5f)),
+            reflectivityFactor(ai_real(1.0f)),
+            emissiveIntensityFactor(ai_real(0.0)),
             metallic(),
+            roughness(),
             sheen(),
             sheen_roughness(),
             clearcoat_thickness(),
             clearcoat_roughness(),
+            clearcoat_NormalScale(),
             transmission(),
             thickness(),
-            attenuationColor(),
-            attenuationDistance(),
+            attenuation_color(),
+            attenuation_distance(),
             iridescence(),
             iridescenceIor(),
             iridescenceThicknessMinimum(),
             iridescenceThicknessMaximum(),
-            iridescenceThicknessRange(),
             anisotropy(),
-            anisotropyRotation(),
-            anisotropyStrength(),
+            anisotropy_rotation(),
+            anisotropy_strength(),
+            specularColorFactor(),
             bump_multiplier(ai_real(1.0)) {
         std::fill_n(clamp, static_cast<unsigned int>(TextureTypeCount), false);
     }

@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJFILEMTLIMPORTER_H_INC
 
 #include <assimp/defs.h>
+#include <assimp/types.h>
+#include <assimp/vector2.h>
 #include <string>
 #include <vector>
 #include "Common/Maybe.h"
@@ -88,6 +90,11 @@ private:
     /// Gets a float value from data.
     void getFloatValue(ai_real &value);
     void getFloatValue(Maybe<ai_real> &value);
+    /// Gets a bool value from data.
+    void getBoolValue(bool &value);
+    /// Gets a vector2 value from data.
+    void getVector2Values(aiVector2D &value);
+    void getVector2Values(Maybe<aiVector2D> &value);
     /// Creates a new material from loaded data.
     void createMaterial();
     /// Get texture name from loaded data.
