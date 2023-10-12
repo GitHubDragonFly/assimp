@@ -132,6 +132,7 @@ private:
 #endif
 
 // Vec/matrix types, as raw float arrays
+typedef float(vec2)[2];
 typedef float(vec3)[3];
 typedef float(vec4)[4];
 typedef float(mat4)[16];
@@ -166,6 +167,11 @@ inline void CopyValue(const glTFCommon::vec3 &v, aiVector3D &out) {
     out.x = v[0];
     out.y = v[1];
     out.z = v[2];
+}
+
+inline void CopyValue(const glTFCommon::vec2 &v, aiVector2D &out) {
+    out.x = v[0];
+    out.y = v[1];
 }
 
 inline void CopyValue(const glTFCommon::vec4 &v, aiQuaternion &out) {
