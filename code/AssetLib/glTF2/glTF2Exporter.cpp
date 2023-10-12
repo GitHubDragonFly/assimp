@@ -817,6 +817,37 @@ bool glTF2Exporter::GetMatIridescence(const aiMaterial &mat, glTF2::MaterialIrid
     return true;
 }
 
+bool glTF2Exporter::GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission) {
+    if (mat.Get(AI_MATKEY_TRANSMISSION_FACTOR, transmission.transmissionFactor) != aiReturn_SUCCESS) {
+        return false;
+    }
+
+    // Transmission factor of zero disables Transmission, so do not export
+    if (transmission.transmissionFactor == 0.0f)
+        return false;
+
+    GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_TRANSMISSION_TEXTURE);
+
+    return true;
+}
+
+bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume) {
+    if (mat.Get(AI_MATKEY_VOLUME_THICKNESS_FACTOR, volume.thicknessFactor) != aiReturn_SUCCESS) {
+        return false;
+    }
+
+    // Volume factor of zero disables Volume, so do not export
+    if (volume.thicknessFactor == 0.0f)
+        return false;
+
+    GetMatColor(mat, volume.attenuationColor, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
+    mat.Get(AI_MATKEY_VOLUME_ATTENUATION_DISTANCE, volume.attenuationDistance);
+
+    GetMatTex(mat, volume.thicknessTexture, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
+
+    return true;
+}
+
 bool glTF2Exporter::GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAnisotropy &anisotropy) {
     if (mat.Get(AI_MATKEY_ANISOTROPY_FACTOR, anisotropy.anisotropyFactor) != aiReturn_SUCCESS) {
         return false;
@@ -832,24 +863,6 @@ bool glTF2Exporter::GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAniso
     GetMatTex(mat, anisotropy.anisotropyTexture, AI_MATKEY_ANISOTROPY_TEXTURE);
 
     return true;
-}
-
-bool glTF2Exporter::GetMatTransmission(const aiMaterial &mat, glTF2::MaterialTransmission &transmission) {
-    bool result = mat.Get(AI_MATKEY_TRANSMISSION_FACTOR, transmission.transmissionFactor) == aiReturn_SUCCESS;
-    GetMatTex(mat, transmission.transmissionTexture, AI_MATKEY_TRANSMISSION_TEXTURE);
-    return result || transmission.transmissionTexture.texture;
-}
-
-bool glTF2Exporter::GetMatVolume(const aiMaterial &mat, glTF2::MaterialVolume &volume) {
-    bool result = mat.Get(AI_MATKEY_VOLUME_THICKNESS_FACTOR, volume.thicknessFactor) != aiReturn_SUCCESS;
-
-    result = result || GetMatColor(mat, volume.attenuationColor, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
-    result = result || mat.Get(AI_MATKEY_VOLUME_ATTENUATION_DISTANCE, volume.attenuationDistance);
-
-    GetMatTex(mat, volume.thicknessTexture, AI_MATKEY_VOLUME_THICKNESS_TEXTURE);
-
-    // Valid if any of these properties are available
-    return result || volume.thicknessTexture.texture;
 }
 
 bool glTF2Exporter::GetMatIOR(const aiMaterial &mat, glTF2::MaterialIOR &ior) {

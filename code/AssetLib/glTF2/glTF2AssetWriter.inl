@@ -511,30 +511,6 @@ namespace glTF2 {
             }
         }
 
-        if (m.materialAnisotropy.isPresent) {
-            Value materialAnisotropy(rapidjson::Type::kObjectType);
-
-            MaterialAnisotropy &anisotropy = m.materialAnisotropy.value;
-
-            if (anisotropy.anisotropyFactor != 0.f) {
-                WriteFloat(materialAnisotropy, anisotropy.anisotropyFactor, "anisotropyFactor", w.mAl);
-            }
-
-            if (anisotropy.anisotropyStrength != 0.f) {
-                WriteFloat(materialAnisotropy, anisotropy.anisotropyStrength, "anisotropyStrength", w.mAl);
-            }
-
-            if (anisotropy.anisotropyRotation != 0.f) {
-                WriteFloat(materialAnisotropy, anisotropy.anisotropyRotation, "anisotropyRotation", w.mAl);
-            }
-
-            WriteTex(materialAnisotropy, anisotropy.anisotropyTexture, "anisotropyTexture", w.mAl);
-
-            if (!materialAnisotropy.ObjectEmpty()) {
-                exts.AddMember("KHR_materials_anisotropy", materialAnisotropy, w.mAl);
-            }
-        }
-
         if (m.materialTransmission.isPresent) {
             Value materialTransmission(rapidjson::Type::kObjectType);
 
@@ -570,6 +546,30 @@ namespace glTF2 {
 
             if (!materialVolume.ObjectEmpty()) {
                 exts.AddMember("KHR_materials_volume", materialVolume, w.mAl);
+            }
+        }
+
+        if (m.materialAnisotropy.isPresent) {
+            Value materialAnisotropy(rapidjson::Type::kObjectType);
+
+            MaterialAnisotropy &anisotropy = m.materialAnisotropy.value;
+
+            if (anisotropy.anisotropyFactor != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyFactor, "anisotropyFactor", w.mAl);
+            }
+
+            if (anisotropy.anisotropyStrength != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyStrength, "anisotropyStrength", w.mAl);
+            }
+
+            if (anisotropy.anisotropyRotation != 0.f) {
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyRotation, "anisotropyRotation", w.mAl);
+            }
+
+            WriteTex(materialAnisotropy, anisotropy.anisotropyTexture, "anisotropyTexture", w.mAl);
+
+            if (!materialAnisotropy.ObjectEmpty()) {
+                exts.AddMember("KHR_materials_anisotropy", materialAnisotropy, w.mAl);
             }
         }
 

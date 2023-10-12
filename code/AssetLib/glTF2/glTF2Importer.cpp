@@ -357,18 +357,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             }
         }
 
-        // KHR_materials_anisotropy
-        if (mat.materialAnisotropy.isPresent) {
-            MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
-
-            if (anisotropy.anisotropyFactor != 0.f) {
-                aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
-                aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
-                aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
-                SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
-            }
-        }
-
         // KHR_materials_transmission
         if (mat.materialTransmission.isPresent) {
             MaterialTransmission &transmission = mat.materialTransmission.value;
@@ -385,6 +373,18 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
             SetMaterialColorProperty(r, volume.attenuationColor, aimat, AI_MATKEY_VOLUME_ATTENUATION_COLOR);
             aimat->AddProperty(&volume.attenuationDistance, 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
             SetMaterialTextureProperty(embeddedTexIdxs, r, volume.thicknessTexture, aimat, aiTextureType_TRANSMISSION, 1);
+        }
+
+        // KHR_materials_anisotropy
+        if (mat.materialAnisotropy.isPresent) {
+            MaterialAnisotropy &anisotropy = mat.materialAnisotropy.value;
+
+            if (anisotropy.anisotropyFactor != 0.f) {
+                aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
+                aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
+                aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
+                SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
+            }
         }
 
         // KHR_materials_ior
