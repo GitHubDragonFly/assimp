@@ -51,6 +51,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <assimp/types.h>
+#include <assimp/vector2.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -333,6 +334,11 @@ enum aiTextureType {
     * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_anisotropy
     */
     aiTextureType_ANISOTROPY = 23,
+
+    /** PBR Specular
+    * https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_specular
+    */
+    aiTextureType_PBR_SPECULAR = 24,
 
     /** Unknown texture
      *
@@ -771,6 +777,9 @@ public:
             unsigned int idx, aiString &pOut) const;
 
     aiReturn Get(const char *pKey, unsigned int type,
+            unsigned int idx, aiVector2D &pOut) const;
+
+    aiReturn Get(const char *pKey, unsigned int type,
             unsigned int idx, aiColor3D &pOut) const;
 
     aiReturn Get(const char *pKey, unsigned int type,
@@ -872,6 +881,12 @@ public:
             unsigned int type = 0,
             unsigned int index = 0);
 
+    aiReturn AddProperty(const aiVector2D *pInput,
+            unsigned int pNumValues,
+            const char *pKey,
+            unsigned int type = 0,
+            unsigned int index = 0);
+
     aiReturn AddProperty(const aiVector3D *pInput,
             unsigned int pNumValues,
             const char *pKey,
@@ -959,6 +974,7 @@ extern "C" {
 // ---------------------------------------------------------------------------
 #define AI_MATKEY_NAME "?mat.name", 0, 0
 #define AI_MATKEY_TWOSIDED "$mat.twosided", 0, 0
+#define AI_MATKEY_ALPHACUTOFF "$mat.alphaCutoff", 0, 0
 #define AI_MATKEY_SHADING_MODEL "$mat.shadingm", 0, 0
 #define AI_MATKEY_ENABLE_WIREFRAME "$mat.wireframe", 0, 0
 #define AI_MATKEY_BLEND_FUNC "$mat.blend", 0, 0
@@ -1009,6 +1025,13 @@ extern "C" {
 // -1.0 = anisotropy along bitangent direction
 #define AI_MATKEY_ANISOTROPY_FACTOR "$mat.anisotropyFactor", 0, 0
 
+// Metallic/Roughness Specular
+// ---------------------------
+#define AI_MATKEY_PBR_SPECULAR_FACTOR "$mat.specular.factor", 0, 0
+#define AI_MATKEY_PBR_SPECULAR_COLOR_FACTOR "$mat.specularColorFactor", 0, 0
+#define AI_MATKEY_PBR_SPECULAR_TEXTURE aiTextureType_PBR_SPECULAR, 0
+#define AI_MATKEY_PBR_SPECULAR_COLOR_TEXTURE aiTextureType_PBR_SPECULAR, 1
+
 // Specular/Glossiness Workflow
 // ---------------------------
 // Diffuse/Albedo Color. Note: Pure Metals have a diffuse of {0,0,0}
@@ -1034,6 +1057,7 @@ extern "C" {
 // Clearcoat layer intensity. 0.0 = none (disabled)
 #define AI_MATKEY_CLEARCOAT_FACTOR "$mat.clearcoat.factor", 0, 0
 #define AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR "$mat.clearcoat.roughnessFactor", 0, 0
+#define AI_MATKEY_CLEARCOAT_NORMAL_SCALE "$mat.clearcoat.clearcoatNormalScale", 0, 0
 #define AI_MATKEY_CLEARCOAT_TEXTURE aiTextureType_CLEARCOAT, 0
 #define AI_MATKEY_CLEARCOAT_ROUGHNESS_TEXTURE aiTextureType_CLEARCOAT, 1
 #define AI_MATKEY_CLEARCOAT_NORMAL_TEXTURE aiTextureType_CLEARCOAT, 2
@@ -1047,7 +1071,6 @@ extern "C" {
 #define AI_MATKEY_IRIDESCENCE_IOR "$mat.iridescence.iridescenceIor", 0, 0
 #define AI_MATKEY_IRIDESCENCE_THICKNESS_MINIMUM "$mat.iridescence.iridescenceThicknessMinimum", 0, 0
 #define AI_MATKEY_IRIDESCENCE_THICKNESS_MAXIMUM "$mat.iridescence.iridescenceThicknessMaximum", 0, 0
-#define AI_MATKEY_IRIDESCENCE_THICKNESS_RANGE "$mat.iridescence.iridescenceThicknessRange", 0, 0
 // The iridescence intensity texture.
 #define AI_MATKEY_IRIDESCENCE_TEXTURE aiTextureType_IRIDESCENCE, 0
 // The thickness texture of the thin-film layer.
@@ -1620,6 +1643,17 @@ ASSIMP_API C_ENUM aiReturn aiGetMaterialColor(const C_STRUCT aiMaterial *pMat,
         unsigned int type,
         unsigned int index,
         C_STRUCT aiColor4D *pOut);
+
+// ---------------------------------------------------------------------------
+/** @brief Retrieve a vector2 value from the material property table
+*
+* See the sample for aiGetMaterialFloat for more information*/
+// ---------------------------------------------------------------------------
+ASSIMP_API C_ENUM aiReturn aiGetMaterialVector2(const C_STRUCT aiMaterial *pMat,
+        const char *pKey,
+        unsigned int type,
+        unsigned int index,
+        C_STRUCT aiVector2D *pOut);
 
 // ---------------------------------------------------------------------------
 /** @brief Retrieve a aiUVTransform value from the material property table

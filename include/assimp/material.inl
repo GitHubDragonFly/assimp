@@ -217,6 +217,15 @@ AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
 }
 // ---------------------------------------------------------------------------
 AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
+        unsigned int idx,aiVector2D& pOut) const {
+    aiVector2D v;
+    const aiReturn ret = aiGetMaterialVector2(this,pKey,type,idx,&v);
+    if (ret == aiReturn_SUCCESS)
+        pOut = aiVector2D(v.x,v.y);
+    return ret;
+}
+// ---------------------------------------------------------------------------
+AI_FORCE_INLINE aiReturn aiMaterial::Get(const char* pKey,unsigned int type,
         unsigned int idx,aiString& pOut) const {
     return aiGetMaterialString(this,pKey,type,idx,&pOut);
 }
@@ -298,6 +307,17 @@ AI_FORCE_INLINE aiReturn aiMaterial::AddProperty(const aiVector3D* pInput,
         unsigned int index) {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiVector3D),
+        pKey,type,index,ai_real_to_property_type_info(pInput->x));
+}
+
+// ---------------------------------------------------------------------------
+AI_FORCE_INLINE aiReturn aiMaterial::AddProperty(const aiVector2D* pInput,
+        const unsigned int pNumValues,
+        const char* pKey,
+        unsigned int type,
+        unsigned int index) {
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiVector2D),
         pKey,type,index,ai_real_to_property_type_info(pInput->x));
 }
 
@@ -388,6 +408,18 @@ AI_FORCE_INLINE aiReturn aiMaterial::AddProperty<aiVector3D>(const aiVector3D* p
         unsigned int index) {
     return AddBinaryProperty((const void*)pInput,
         pNumValues * sizeof(aiVector3D),
+        pKey,type,index,aiPTI_Float);
+}
+
+// ---------------------------------------------------------------------------
+template<>
+AI_FORCE_INLINE aiReturn aiMaterial::AddProperty<aiVector2D>(const aiVector2D* pInput,
+        const unsigned int pNumValues,
+        const char* pKey,
+        unsigned int type,
+        unsigned int index) {
+    return AddBinaryProperty((const void*)pInput,
+        pNumValues * sizeof(aiVector2D),
         pKey,type,index,aiPTI_Float);
 }
 
