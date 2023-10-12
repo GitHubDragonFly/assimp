@@ -94,6 +94,8 @@ const char *aiTextureTypeToString(aiTextureType in) {
         return "Anisotropy";
     case aiTextureType_TRANSMISSION:
         return "Transmission";
+    case aiTextureType_PBR_SPECULAR:
+        return "PBRSpecular";
     case aiTextureType_UNKNOWN:
         return "Unknown";
     default:
