@@ -44,6 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBJ_FILEDATA_H_INC
 
 #include <assimp/mesh.h>
+#include <assimp/types.h>
 #include <assimp/vector2.h>
 #include <map>
 #include <vector>
