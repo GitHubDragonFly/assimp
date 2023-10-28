@@ -381,7 +381,6 @@ static aiMaterial *ImportMaterial(std::vector<int> &embeddedTexIdxs, Asset &r, M
 
             if (anisotropy.anisotropyFactor != 0.f) {
                 aimat->AddProperty(&anisotropy.anisotropyFactor, 1, AI_MATKEY_ANISOTROPY_FACTOR);
-                aimat->AddProperty(&anisotropy.anisotropyStrength, 1, AI_MATKEY_ANISOTROPY_STRENGTH);
                 aimat->AddProperty(&anisotropy.anisotropyRotation, 1, AI_MATKEY_ANISOTROPY_ROTATION);
                 SetMaterialTextureProperty(embeddedTexIdxs, r, anisotropy.anisotropyTexture, aimat, aiTextureType_ANISOTROPY, 0);
             }

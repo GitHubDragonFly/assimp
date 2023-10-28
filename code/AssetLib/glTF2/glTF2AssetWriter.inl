@@ -555,11 +555,7 @@ namespace glTF2 {
             MaterialAnisotropy &anisotropy = m.materialAnisotropy.value;
 
             if (anisotropy.anisotropyFactor != 0.f) {
-                WriteFloat(materialAnisotropy, anisotropy.anisotropyFactor, "anisotropyFactor", w.mAl);
-            }
-
-            if (anisotropy.anisotropyStrength != 0.f) {
-                WriteFloat(materialAnisotropy, anisotropy.anisotropyStrength, "anisotropyStrength", w.mAl);
+                WriteFloat(materialAnisotropy, anisotropy.anisotropyFactor, "anisotropyStrength", w.mAl);
             }
 
             if (anisotropy.anisotropyRotation != 0.f) {

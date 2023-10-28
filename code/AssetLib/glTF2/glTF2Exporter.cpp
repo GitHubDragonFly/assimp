@@ -576,7 +576,10 @@ void glTF2Exporter::GetMatTex(const aiMaterial &mat, Ref<Texture> &texture, unsi
     aiString tex;
 
     // Read texcoord (UV map index)
-    mat.Get(AI_MATKEY_UVWSRC(tt, slot), texCoord);
+    // Note: must be an int to be successful.
+    int tmp = 0;
+    const auto ok = mat.Get(AI_MATKEY_UVWSRC(tt, slot), tmp);
+    if (ok == aiReturn_SUCCESS) texCoord = tmp;
 
     if (mat.Get(AI_MATKEY_TEXTURE(tt, slot), tex) == AI_SUCCESS) {
         std::string path = tex.C_Str();
@@ -857,7 +860,6 @@ bool glTF2Exporter::GetMatAnisotropy(const aiMaterial &mat, glTF2::MaterialAniso
     if (anisotropy.anisotropyFactor == 0.0f)
         return false;
 
-    mat.Get(AI_MATKEY_ANISOTROPY_STRENGTH, anisotropy.anisotropyStrength);
     mat.Get(AI_MATKEY_ANISOTROPY_ROTATION, anisotropy.anisotropyRotation);
 
     GetMatTex(mat, anisotropy.anisotropyTexture, AI_MATKEY_ANISOTROPY_TEXTURE);

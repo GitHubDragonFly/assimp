@@ -1250,11 +1250,11 @@ inline void Material::Read(Value &material, Asset &r) {
     SetDefaults();
 
     if (Value *curPbrMetallicRoughness = FindObject(material, "pbrMetallicRoughness")) {
+        ReadMember(*curPbrMetallicRoughness, "metallicFactor", this->pbrMetallicRoughness.metallicFactor);
+        ReadMember(*curPbrMetallicRoughness, "roughnessFactor", this->pbrMetallicRoughness.roughnessFactor);
         ReadMember(*curPbrMetallicRoughness, "baseColorFactor", this->pbrMetallicRoughness.baseColorFactor);
         ReadTextureProperty(r, *curPbrMetallicRoughness, "baseColorTexture", this->pbrMetallicRoughness.baseColorTexture);
         ReadTextureProperty(r, *curPbrMetallicRoughness, "metallicRoughnessTexture", this->pbrMetallicRoughness.metallicRoughnessTexture);
-        ReadMember(*curPbrMetallicRoughness, "metallicFactor", this->pbrMetallicRoughness.metallicFactor);
-        ReadMember(*curPbrMetallicRoughness, "roughnessFactor", this->pbrMetallicRoughness.roughnessFactor);
     }
 
     ReadTextureProperty(r, material, "normalTexture", this->normalTexture);
@@ -1272,10 +1272,10 @@ inline void Material::Read(Value &material, Asset &r) {
                 PbrSpecularGlossiness pbrSG;
 
                 ReadMember(*curPbrSpecularGlossiness, "diffuseFactor", pbrSG.diffuseFactor);
-                ReadTextureProperty(r, *curPbrSpecularGlossiness, "diffuseTexture", pbrSG.diffuseTexture);
-                ReadTextureProperty(r, *curPbrSpecularGlossiness, "specularGlossinessTexture", pbrSG.specularGlossinessTexture);
                 ReadMember(*curPbrSpecularGlossiness, "specularFactor", pbrSG.specularFactor);
                 ReadMember(*curPbrSpecularGlossiness, "glossinessFactor", pbrSG.glossinessFactor);
+                ReadTextureProperty(r, *curPbrSpecularGlossiness, "diffuseTexture", pbrSG.diffuseTexture);
+                ReadTextureProperty(r, *curPbrSpecularGlossiness, "specularGlossinessTexture", pbrSG.specularGlossinessTexture);
 
                 this->pbrSpecularGlossiness = Nullable<PbrSpecularGlossiness>(pbrSG);
             }
@@ -1344,7 +1344,6 @@ inline void Material::Read(Value &material, Asset &r) {
                 MaterialAnisotropy anisotropy;
 
                 ReadMember(*curMaterialAnisotropy, "anisotropyFactor", anisotropy.anisotropyFactor);
-                ReadMember(*curMaterialAnisotropy, "anisotropyStrength", anisotropy.anisotropyStrength);
                 ReadMember(*curMaterialAnisotropy, "anisotropyRotation", anisotropy.anisotropyRotation);
                 ReadTextureProperty(r, *curMaterialAnisotropy, "anisotropyTexture", anisotropy.anisotropyTexture);
 
@@ -1463,7 +1462,6 @@ inline void MaterialVolume::SetDefaults() {
 inline void MaterialAnisotropy::SetDefaults() {
     //KHR_materials_anisotropy properties
     anisotropyFactor = 0.f;
-    anisotropyStrength = 0.f;
     anisotropyRotation = 0.f;
 }
 

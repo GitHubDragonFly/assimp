@@ -750,11 +750,11 @@ struct OcclusionTextureInfo : TextureInfo {
 };
 
 struct PbrMetallicRoughness {
+    float metallicFactor;
+    float roughnessFactor;
     vec4 baseColorFactor;
     TextureInfo baseColorTexture;
     TextureInfo metallicRoughnessTexture;
-    float metallicFactor;
-    float roughnessFactor;
 };
 
 struct PbrSpecularGlossiness {
@@ -832,7 +832,6 @@ struct MaterialVolume {
 
 struct MaterialAnisotropy {
     float anisotropyFactor;
-    float anisotropyStrength;
     float anisotropyRotation;
     TextureInfo anisotropyTexture;
 
