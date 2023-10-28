@@ -231,10 +231,6 @@ void ObjFileMtlImporter::load() {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
-                        } else if (*m_DataIt == 's') {
-                            ++m_DataIt;
-                            if (m_pModel->mCurrentMaterial != nullptr)
-                                getFloatValue(m_pModel->mCurrentMaterial->anisotropy_strength);
                         } else {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->anisotropy);

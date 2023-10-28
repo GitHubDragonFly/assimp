@@ -233,7 +233,6 @@ struct Material {
     //! PBR Anisotropy
     Maybe<ai_real> anisotropy;
     Maybe<ai_real> anisotropy_rotation;
-    Maybe<ai_real> anisotropy_strength;
     //! PBR Specular
     Maybe<ai_real> specularFactor;
     Maybe<aiColor3D> specularColorFactor;
@@ -270,7 +269,6 @@ struct Material {
             iridescenceThicknessMaximum(),
             anisotropy(),
             anisotropy_rotation(),
-            anisotropy_strength(),
             specularFactor(),
             specularColorFactor(),
             bump_multiplier(ai_real(1.0)) {

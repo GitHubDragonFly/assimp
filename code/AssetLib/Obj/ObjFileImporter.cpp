@@ -658,8 +658,6 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
             mat->AddProperty(&pCurrentMaterial->attenuation_distance.Get(), 1, AI_MATKEY_VOLUME_ATTENUATION_DISTANCE);
         if (pCurrentMaterial->anisotropy) {
             mat->AddProperty(&pCurrentMaterial->anisotropy.Get(), 1, AI_MATKEY_ANISOTROPY_FACTOR);
-            if (pCurrentMaterial->anisotropy_strength)
-                mat->AddProperty(&pCurrentMaterial->anisotropy_strength.Get(), 1, AI_MATKEY_ANISOTROPY_STRENGTH);
             if (pCurrentMaterial->anisotropy_rotation)
                 mat->AddProperty(&pCurrentMaterial->anisotropy_rotation.Get(), 1, AI_MATKEY_ANISOTROPY_ROTATION);
         }
