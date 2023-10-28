@@ -1021,9 +1021,6 @@ extern "C" {
 // Roughness factor. 0.0 = Perfectly Smooth, 1.0 = Completely Rough
 #define AI_MATKEY_ROUGHNESS_FACTOR "$mat.roughnessFactor", 0, 0
 #define AI_MATKEY_ROUGHNESS_TEXTURE aiTextureType_DIFFUSE_ROUGHNESS, 0
-// Anisotropy factor. 0.0 = isotropic, 1.0 = anisotropy along tangent direction,
-// -1.0 = anisotropy along bitangent direction
-#define AI_MATKEY_ANISOTROPY_FACTOR "$mat.anisotropyFactor", 0, 0
 
 // Metallic/Roughness Specular
 // ---------------------------
@@ -1080,11 +1077,12 @@ extern "C" {
 // ------------
 // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_anisotropy
 // The anisotropic property of a material as observable with brushed metals for example
+// Anisotropy factor. 0.0 = isotropic, 1.0 = anisotropy along tangent direction,
+// -1.0 = anisotropy along bitangent direction
 #define AI_MATKEY_ANISOTROPY_FACTOR "$mat.anisotropy.factor", 0, 0
-#define AI_MATKEY_ANISOTROPY_STRENGTH "$mat.anisotropy.anisotropyStrength", 0, 0
 #define AI_MATKEY_ANISOTROPY_ROTATION "$mat.anisotropy.anisotropyRotation", 0, 0
 // Texture whose red and green channels represent the anisotropy direction in [-1, 1] tangent, bitangent space.
-// The blue channel contains strength as [0, 1] to be multiplied by AI_MATKEY_ANISOTROPY_STRENGTH.
+// The blue channel contains strength as [0, 1] to be multiplied by AI_MATKEY_ANISOTROPY_FACTOR.
 // Rotated by AI_MATKEY_ANISOTROPY_ROTATION
 #define AI_MATKEY_ANISOTROPY_TEXTURE aiTextureType_ANISOTROPY, 0
 
