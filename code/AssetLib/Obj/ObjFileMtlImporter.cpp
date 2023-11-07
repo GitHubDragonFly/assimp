@@ -98,6 +98,7 @@ static constexpr char ClampOption[] = "-clamp";
 static constexpr char BumpOption[] = "-bm";
 static constexpr char ChannelOption[] = "-imfchan";
 static constexpr char TypeOption[] = "-type";
+static constexpr char WrappingOption[] = "-w";
 
 // -------------------------------------------------------------------
 //  Constructor
@@ -704,10 +705,14 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption, static_cast<unsigned int>(strlen(ModifyMapOption)))) {
             skipToken = 3;
-        } else if (!ASSIMP_strincmp(pPtr, OffsetOption, static_cast<unsigned int>(strlen(OffsetOption))) ||
-                !ASSIMP_strincmp(pPtr, ScaleOption, static_cast<unsigned int>(strlen(ScaleOption))) ||
-                !ASSIMP_strincmp(pPtr, TurbulenceOption, static_cast<unsigned int>(strlen(TurbulenceOption)))) {
+        } else if (!ASSIMP_strincmp(pPtr, OffsetOption, static_cast<unsigned int>(strlen(OffsetOption)))) {
             skipToken = 4;
+        } else if (!ASSIMP_strincmp(pPtr, ScaleOption, static_cast<unsigned int>(strlen(ScaleOption)))) {
+            skipToken = 4;
+        } else if (!ASSIMP_strincmp(pPtr, TurbulenceOption, static_cast<unsigned int>(strlen(TurbulenceOption)))) {
+            skipToken = 4;
+        } else if (!ASSIMP_strincmp(pPtr, WrappingOption, static_cast<unsigned int>(strlen(WrappingOption)))) {
+            skipToken = 3;
         }
 
         for (int i = 0; i < skipToken; ++i) {
