@@ -438,9 +438,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         std::vector<T> tempData;
         ParseVectorDataArray(tempData, GetRequiredElement(source, dataElementName));
 
-        if (tempData.size() != mapping_offsets.size()) {
+        if (tempData.size() != vertex_count) {
             FBXImporter::LogError("length of input data unexpected for ByVertice mapping: ",
-                                  tempData.size(), ", expected ", mapping_offsets.size());
+                                  tempData.size(), ", expected ", vertex_count);
             return;
         }
 
@@ -467,9 +467,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
         std::vector<int> uvIndices;
         ParseVectorDataArray(uvIndices,GetRequiredElement(source,indexDataElementName));
 
-        if (uvIndices.size() != vertex_count) {
+        if (uvIndices.size() != mapping_offsets.size()) {
             FBXImporter::LogError("length of input data unexpected for ByVertice mapping: ",
-                                  uvIndices.size(), ", expected ", vertex_count);
+                                  uvIndices.size(), ", expected ", mapping_offsets.size());
             return;
         }
 
@@ -524,9 +524,9 @@ void ResolveVertexDataArray(std::vector<T>& data_out, const Scope& source,
             uvIndices.resize(vertex_count);
         }
 
-        if (uvIndices.size() != vertex_count) {
+        if (uvIndices.size() != mapping_offsets.size()) {
             FBXImporter::LogError("length of input data unexpected for ByPolygonVertex mapping: ",
-                                  uvIndices.size(), ", expected ", vertex_count);
+                                  uvIndices.size(), ", expected ", mapping_offsets.size());
             return;
         }
 
