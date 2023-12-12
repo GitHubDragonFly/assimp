@@ -1204,7 +1204,7 @@ unsigned int FBXConverter::ConvertMeshSingleMaterial(const MeshGeometry &mesh, c
                 const auto &curNormals = shapeGeometry->GetNormals();
                 const auto &curIndices = shapeGeometry->GetIndices();
                 //losing channel name if using shapeGeometry->Name()
-                // if blendShapeChannel Name is empty or don't have a ".", add geoMetryName;
+                // if blendShapeChannel Name is empty or doesn't have a ".", add geoMetryName;
                 auto aniName = FixAnimMeshName(blendShapeChannel->Name());
                 auto geoMetryName = FixAnimMeshName(shapeGeometry->Name());
                 if (aniName.empty()) {
@@ -1621,14 +1621,14 @@ void FBXConverter::ConvertCluster(std::vector<aiBone*> &local_mesh_bones, const 
 
         //bone->mOffsetMatrix = cluster->Transform();
         // store local transform link for post processing
-
+        
         bone->mOffsetMatrix = cluster->TransformLink();
         bone->mOffsetMatrix.Inverse();
 
         const aiMatrix4x4 matrix = (aiMatrix4x4)absolute_transform;
 
         bone->mOffsetMatrix = bone->mOffsetMatrix * matrix; // * mesh_offset
-
+        
         //
         // Now calculate the aiVertexWeights
         //

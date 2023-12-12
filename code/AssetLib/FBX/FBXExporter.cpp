@@ -1065,7 +1065,7 @@ inline int64_t to_ktime(double ticks, const aiAnimation* anim) {
     if (anim->mTicksPerSecond <= 0) {
         return static_cast<int64_t>(ticks) * FBX::SECOND;
     }
-    return (static_cast<int64_t>(ticks) / static_cast<int64_t>(anim->mTicksPerSecond)) * FBX::SECOND;
+    return (static_cast<int64_t>(ticks / anim->mTicksPerSecond)) * FBX::SECOND;
 }
 
 inline int64_t to_ktime(double time) {
