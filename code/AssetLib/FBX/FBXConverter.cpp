@@ -2079,6 +2079,11 @@ void FBXConverter::SetTextureProperties(aiMaterial *out_mat, const TextureMap &_
     TrySetTextureProperties(out_mat, _textures, "Maya|emissionColor", aiTextureType_EMISSION_COLOR, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|metalness", aiTextureType_METALNESS, mesh);
     TrySetTextureProperties(out_mat, _textures, "Maya|diffuseRoughness", aiTextureType_DIFFUSE_ROUGHNESS, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|base", aiTextureType_BASE_COLOR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specular", aiTextureType_PBR_SPECULAR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specularColor", aiTextureType_PBR_SPECULAR, mesh);
+    TrySetTextureProperties(out_mat, _textures, "Maya|specularRoughness", aiTextureType_PBR_SPECULAR, mesh);
+
 
     // Maya stingray
     TrySetTextureProperties(out_mat, _textures, "Maya|TEX_color_map", aiTextureType_BASE_COLOR, mesh);
