@@ -372,8 +372,11 @@ void DXFImporter::ExpandBlockReferences(DXF::Block& bl,const DXF::BlockMap& bloc
                 // XXX order
                 aiMatrix4x4 trafo, tmp;
                 aiMatrix4x4::Translation(-bl_src.base,trafo);
-                trafo *= aiMatrix4x4::Scaling(insert.scale,tmp);
+                //Need to translate position before scaling the insert
+                //otherwise the position ends up being the position*scaling
+                //STH 2024.01.17
                 trafo *= aiMatrix4x4::Translation(insert.pos,tmp);
+                trafo *= aiMatrix4x4::Scaling(insert.scale,tmp);
 
                 // XXX rotation currently ignored - I didn't find an appropriate sample model.
                 if (insert.angle != 0.f) {
