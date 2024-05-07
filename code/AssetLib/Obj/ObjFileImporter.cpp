@@ -678,8 +678,8 @@ void ObjFileImporter::createMaterials(const ObjFile::Model *pModel, aiScene *pSc
         // Adding textures
         const int uvwIndex = 0;
 
-        if (0 != pCurrentMaterial->texture.length) {
-            mat->AddProperty(&pCurrentMaterial->texture, AI_MATKEY_TEXTURE_DIFFUSE(0));
+        if (0 != pCurrentMaterial->textureDiffuse.length) {
+            mat->AddProperty(&pCurrentMaterial->textureDiffuse, AI_MATKEY_TEXTURE_DIFFUSE(0));
             mat->AddProperty(&uvwIndex, 1, AI_MATKEY_UVWSRC_DIFFUSE(0));
             if (pCurrentMaterial->clamp[ObjFile::Material::TextureDiffuseType]) {
                 addTextureMappingModeProperty(mat, aiTextureType_DIFFUSE);

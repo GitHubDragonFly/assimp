@@ -98,6 +98,8 @@ static constexpr char ClampOption[] = "-clamp";
 static constexpr char BumpOption[] = "-bm";
 static constexpr char ChannelOption[] = "-imfchan";
 static constexpr char TypeOption[] = "-type";
+static constexpr char CenterOption[] = "-c";
+static constexpr char RotationOption[] = "-r";
 static constexpr char WrappingOption[] = "-w";
 
 // -------------------------------------------------------------------
@@ -135,22 +137,22 @@ void ObjFileMtlImporter::load() {
             case 'k':
             case 'K': {
                 ++m_DataIt;
-                if (*m_DataIt == 'a') {
+                if (*m_DataIt == 'a' && *(m_DataIt + 1) == ' ') {
                     // Ambient color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->ambient);
-                } else if (*m_DataIt == 'd') {
+                } else if (*m_DataIt == 'd' && *(m_DataIt + 1) == ' ') {
                     // Diffuse color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->diffuse);
-                } else if (*m_DataIt == 's') {
+                } else if (*m_DataIt == 's' && *(m_DataIt + 1) == ' ') {
                     // Specular color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->specular);
-                } else if (*m_DataIt == 'e') {
+                } else if (*m_DataIt == 'e' && *(m_DataIt + 1) == ' ') {
                     // Emissive color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
@@ -160,12 +162,12 @@ void ObjFileMtlImporter::load() {
             } break;
             case 'T': {
                 ++m_DataIt;
-                if (*m_DataIt == 'f') {
+                if (*m_DataIt == 'f' && *(m_DataIt + 1) == ' ') {
                     // Material transmission color
                     ++m_DataIt;
                     if (m_pModel->mCurrentMaterial != nullptr)
                         getColorRGBA(&m_pModel->mCurrentMaterial->transparent);
-                } else if (*m_DataIt == 'r')  {
+                } else if (*m_DataIt == 'r' && *(m_DataIt + 1) == ' ')  {
                     // Material transmission alpha value
                     ++m_DataIt;
                     ai_real d;
@@ -182,7 +184,7 @@ void ObjFileMtlImporter::load() {
                 } else {
                     // Alpha value
                     ++m_DataIt;
-                    if (m_pModel->mCurrentMaterial != nullptr)
+                    if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                         getFloatValue(m_pModel->mCurrentMaterial->alpha);
                 }
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
@@ -194,13 +196,13 @@ void ObjFileMtlImporter::load() {
                     case 's':
                         // Specular exponent
                         ++m_DataIt;
-                        if (m_pModel->mCurrentMaterial != nullptr)
+                        if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                             getFloatValue(m_pModel->mCurrentMaterial->shininess);
                         break;
                     case 'i':
                         // Index Of refraction
                         ++m_DataIt;
-                        if (m_pModel->mCurrentMaterial != nullptr)
+                        if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                             getFloatValue(m_pModel->mCurrentMaterial->iorFactor);
                         break;
                     case 'e':
@@ -220,94 +222,94 @@ void ObjFileMtlImporter::load() {
                 switch(*m_DataIt) {
                     case 'a':
                         ++m_DataIt;
-                        if (*m_DataIt == 'd') {
+                        if (*m_DataIt == 'd' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->attenuation_distance);
-                        } else if (*m_DataIt == 'c') {
+                        } else if (*m_DataIt == 'c' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getColorRGBA(m_pModel->mCurrentMaterial->attenuation_color);
-                        } else if (*m_DataIt == 'r') {
+                        } else if (*m_DataIt == 'r' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->anisotropy_rotation);
-                        } else {
+                        } else if (*m_DataIt == ' ') {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->anisotropy);
                         }
                         break;
                     case 'i':
                         ++m_DataIt;
-                        if (*m_DataIt == 'i') {
+                        if (*m_DataIt == 'i' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->iridescenceIor);
                         } else if (*m_DataIt == 't') {
                             ++m_DataIt;
-                            if (*m_DataIt == 'x') {
+                            if (*m_DataIt == 'x' && *(m_DataIt + 1) == ' ') {
                                 ++m_DataIt;
                                 if (m_pModel->mCurrentMaterial != nullptr) {
                                     getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessMinimum);
                                 }
-                            } else if (*m_DataIt == 'y') {
+                            } else if (*m_DataIt == 'y' && *(m_DataIt + 1) == ' ') {
                                 ++m_DataIt;
                                 if (m_pModel->mCurrentMaterial != nullptr) {
                                     getFloatValue(m_pModel->mCurrentMaterial->iridescenceThicknessMaximum);
                                 }
                             }
-                        } else {
+                        } else if (*m_DataIt == ' ') {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->iridescence);
                         }
                         break;
                     case 'e':
                         ++m_DataIt;
-                        if (m_pModel->mCurrentMaterial != nullptr)
+                        if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                             getFloatValue(m_pModel->mCurrentMaterial->emissiveIntensityFactor);
                         break;
                     case 'r':
                         ++m_DataIt;
-                        if (*m_DataIt == 'f') {
+                        if (*m_DataIt == 'f' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->reflectivityFactor);
-                        } else {
+                        } else if (*m_DataIt == ' ') {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->roughness);
                         }
                         break;
                     case 'm':
                         ++m_DataIt;
-                        if (m_pModel->mCurrentMaterial != nullptr)
+                        if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                             getFloatValue(m_pModel->mCurrentMaterial->metallic);
                         break;
                     case 's':
                         ++m_DataIt;
-                        if (*m_DataIt == 'r') {
+                        if (*m_DataIt == 'r' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->sheen_roughness);
-                        } else if (*m_DataIt == 'i') {
+                        } else if (*m_DataIt == 'i' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->specularFactor);
-                        } else if (*m_DataIt == 'p') {
+                        } else if (*m_DataIt == 'p' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getColorRGBA(m_pModel->mCurrentMaterial->specularColorFactor);
-                        } else {
+                        } else if (*m_DataIt == ' ') {
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getColorRGBA(m_pModel->mCurrentMaterial->sheen);
                         }
                         break;
                     case 't':
                         ++m_DataIt;
-                        if (*m_DataIt == 'h') {
+                        if (*m_DataIt == 'h' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->thickness);
-                        } else if (*m_DataIt == 'r') {
+                        } else if (*m_DataIt == 'r' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->transmission);
@@ -315,15 +317,15 @@ void ObjFileMtlImporter::load() {
                         break;
                     case 'c':
                         ++m_DataIt;
-                        if (*m_DataIt == 'r') {
+                        if (*m_DataIt == 'r' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_roughness);
-                        } else if (*m_DataIt == 'c') {
+                        } else if (*m_DataIt == 'c' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getFloatValue(m_pModel->mCurrentMaterial->clearcoat_thickness);
-                        } else if (*m_DataIt == 'n') {
+                        } else if (*m_DataIt == 'n' && *(m_DataIt + 1) == ' ') {
                             ++m_DataIt;
                             if (m_pModel->mCurrentMaterial != nullptr)
                                 getVector2Values(m_pModel->mCurrentMaterial->clearcoat_NormalScale);
@@ -341,14 +343,14 @@ void ObjFileMtlImporter::load() {
             case 'a': {
                 // alphaCutoff
                 ++m_DataIt;
-                if (m_pModel->mCurrentMaterial != nullptr)
+                if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                     getFloatValue(m_pModel->mCurrentMaterial->alphaCutoff);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
             case 's': {
                 // material side (doubleSided)
                 ++m_DataIt;
-                if (m_pModel->mCurrentMaterial != nullptr)
+                if (m_pModel->mCurrentMaterial != nullptr && *m_DataIt == ' ')
                     getBoolValue(m_pModel->mCurrentMaterial->twosided);
                 m_DataIt = skipLine<DataArrayIt>(m_DataIt, m_DataItEnd, m_uiLine);
             } break;
@@ -515,7 +517,7 @@ void ObjFileMtlImporter::getTexture() {
     const char *pPtr(&(*m_DataIt));
     if (!ASSIMP_strincmp(pPtr, DiffuseTexture, static_cast<unsigned int>(strlen(DiffuseTexture)))) {
         // Diffuse texture
-        out = &m_pModel->mCurrentMaterial->texture;
+        out = &m_pModel->mCurrentMaterial->textureDiffuse;
         clampIndex = ObjFile::Material::TextureDiffuseType;
     } else if (!ASSIMP_strincmp(pPtr, AmbientTexture, static_cast<unsigned int>(strlen(AmbientTexture)))) {
         // Ambient texture
@@ -704,6 +706,10 @@ void ObjFileMtlImporter::getTextureOption(bool &clamp, int &clampIndex, aiString
                 !ASSIMP_strincmp(pPtr, ChannelOption, static_cast<unsigned int>(strlen(ChannelOption)))) {
             skipToken = 2;
         } else if (!ASSIMP_strincmp(pPtr, ModifyMapOption, static_cast<unsigned int>(strlen(ModifyMapOption)))) {
+            skipToken = 3;
+        } else if (!ASSIMP_strincmp(pPtr, RotationOption, static_cast<unsigned int>(strlen(RotationOption)))) {
+            skipToken = 2;
+        } else if (!ASSIMP_strincmp(pPtr, CenterOption, static_cast<unsigned int>(strlen(CenterOption)))) {
             skipToken = 3;
         } else if (!ASSIMP_strincmp(pPtr, OffsetOption, static_cast<unsigned int>(strlen(OffsetOption)))) {
             skipToken = 4;

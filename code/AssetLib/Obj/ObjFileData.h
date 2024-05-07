@@ -123,10 +123,10 @@ struct Material {
     //! Name of material description
     aiString MaterialName;
     //! Texture names
-    aiString texture;
-    aiString textureSpecular;
+    aiString textureDiffuse;
     aiString textureAmbient;
     aiString textureEmissive;
+    aiString textureSpecular;
     aiString textureBump;
     aiString textureNormal;
     aiString textureReflection[6];
