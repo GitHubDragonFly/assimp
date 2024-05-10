@@ -103,6 +103,22 @@ AI_FORCE_INLINE bool IsSpaceOrNewLine(char_t in) {
 
 // ---------------------------------------------------------------------------------
 template <class char_t>
+AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out, const char_t *end) {
+    while ((*in == (char_t)' ' || *in == (char_t)'\t') && in != end) {
+        ++in;
+    }
+    *out = in;
+    return !IsLineEnd<char_t>(*in);
+}
+
+// ---------------------------------------------------------------------------------
+template <class char_t>
+AI_FORCE_INLINE bool SkipSpaces(const char_t **inout, const char_t *end) {
+    return SkipSpaces<char_t>(*inout, inout, end);
+}
+
+// ---------------------------------------------------------------------------------
+template <class char_t>
 AI_FORCE_INLINE bool SkipSpaces(const char_t *in, const char_t **out) {
     while (*in == (char_t)' ' || *in == (char_t)'\t') {
         ++in;
@@ -213,6 +229,14 @@ AI_FORCE_INLINE bool TokenMatchI(const char *&in, const char *token, unsigned in
 // ---------------------------------------------------------------------------------
 AI_FORCE_INLINE void SkipToken(const char *&in) {
     SkipSpaces(&in);
+    while (!IsSpaceOrNewLine(*in)) {
+        ++in;
+    }
+}
+
+// ---------------------------------------------------------------------------------
+AI_FORCE_INLINE void SkipToken(const char *&in, const char *end) {
+    SkipSpaces(&in, end);
     while (!IsSpaceOrNewLine(*in)) {
         ++in;
     }
