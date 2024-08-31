@@ -51,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "FBXUtil.h"
 #include <assimp/defs.h>
 #include <stdint.h>
-#include <cstdint>
 #include <assimp/Exceptional.h>
 #include <assimp/ByteSwapper.h>
 #include <assimp/DefaultLogger.hpp>
